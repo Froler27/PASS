@@ -1,0 +1,27 @@
+{
+  "name": "pass",
+  "version": "1.0.0",
+  "description": "开发中",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Froler27/PASS.git"
+  },
+  "keywords": [
+    "blockchain",
+    "education",
+    "Ethereum"
+  ],
+  "author": "froler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Froler27/PASS/issues"
+  },
+  "homepage": "https://github.com/Froler27/PASS#readme"
+}
