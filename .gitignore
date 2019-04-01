@@ -1,6 +1,7 @@
 
 
 *.bak
+*.old
 
 node_modules
 build

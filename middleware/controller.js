@@ -2,6 +2,7 @@
 // 这里可以用sync是因为启动时只运行一次，不存在性能问题:
 const fs = require('fs');
 
+// mapping 是一个对象，字符串为 key，函数为 value
 function addMapping(router, mapping) {
     for (var url in mapping) {
         if (url.startsWith('GET ')) {
@@ -14,6 +15,16 @@ function addMapping(router, mapping) {
             var path = url.substring(5);
             router.post(path, mapping[url]);
             console.log(`register URL mapping: POST ${path}`);
+        } else if (url.startsWith('PUT ')) {
+
+            var path = url.substring(4);
+            router.put(path, mapping[url]);
+            console.log(`register URL mapping: PUT ${path}`);
+        } else if (url.startsWith('DELETE ')) {
+            
+            var path = url.substring(7);
+            router.del(path, mapping[url]);
+            console.log(`register URL mapping: DELETE ${path}`);
         } else {
             // 无效的URL:
             console.log(`invalid URL: ${url}`);
