@@ -1,24 +1,32 @@
 pragma solidity >=0.4.21 <0.7.0;
 
-contract Organization{
+import "./Organization.sol";
+
+contract User{
     string name;
-    address creator;
-    address[] admins;
-    address[] members;
-    uint createTime;   
+    string IDCardNum;
+    address myself;
+    uint registerTime; 
+
+    Organization[] ownOrg;          // 用户创建的组织
+    Organization[] adminOrg;        // 用户管理的组织
+    Organization[] memberOrg;       // 用户加入的组织
+
 
     constructor(
-        string memory _name
+        string memory _name,
+        string memory _IDCardNum
     ) public{
         name = _name;
-        creator = msg.sender;
-        createTime = now;
+        IDCardNum = _IDCardNum;
+        myself = msg.sender;
+        registerTime = now;
     }
 
-    modifier onlyCreator{
+    modifier onlyMyself{
         require(
-            msg.sender == creator,
-            "Only the creator can use this function!"
+            msg.sender == myself,
+            "Only the user himself/herself  can use this function!"
         );
         _;
     }
@@ -48,7 +56,7 @@ contract Organization{
     }
 
     function getCreatedTime() public view returns(uint){
-        return createTime;
+        return createdTime;
     }
 
     //------------------------------------------------------------
