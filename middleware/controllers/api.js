@@ -38,6 +38,37 @@ module.exports = {
         });
     },
 
+    'GET /api/a': async (ctx, next) => {
+        var abiTT = [{"constant":false,"inputs":[{"name":"x","type":"uint256"}],"name":"setA","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"a","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getA","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
+        var addressTT = '0x296a3e7065fa80a549844bd554380b42eb6f9d89';
+        // var myContract = new web3.eth.Contract(abiAuth, addressAuth);
+        var contractTT = new ctx.web3.eth.Contract(abiTT, addressTT);
+        var a = await contractTT.methods.getA().call()//.then(function (res) {
+        //     console.log("++++++++++++++++++");
+        //     console.log(res);
+        // }).catch(function (reason) {
+        //     console.log("===================");
+        //     console.log(reason);
+        // });
+        ctx.rest({
+            a: a
+        });
+    },
+
+    'PUT /api/a': async (ctx, next) => {
+        var
+            newA = ctx.request.body,
+            index = -1,
+            i, todo;
+        if (!newA || ! isNaN(newA)) {
+            throw new APIError('invalid_input', 'Missing Number');
+        }
+        var res = await contractTT.methods.setA().send();
+        ctx.rest({
+            res: res
+        });
+    },
+
     'GET /api/todos': async (ctx, next) => {
         ctx.rest({
             todos: todos

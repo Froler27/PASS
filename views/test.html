@@ -9,9 +9,45 @@
 
     <button id="btn" type="button" class="btn btn-primary">获取</button>
 
+    <button id="btn-join" type="button" class="btn btn-primary">注册</button>
+    <button id="btn-login" type="button" class="btn btn-primary" >登录</button>
+    <button id="btn-apply" type="button" class="btn btn-primary" v-on:click="getA">申请证书</button>
+    <button id="btn-create-org" type="button" class="btn btn-primary">创建组织</button>
+    <button id="btn-add-cert-self" type="button" class="btn btn-primary">添加个人证书模板</button>
+    <button id="btn-add-cert-org" type="button" class="btn btn-primary">添加组织证书模板</button>
+
+    <div class="col-md-6">
+
+        <div class="panel panel-default">
+
+          <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-plus"></span> Add New Todo</h3>
+          </div>
+
+          <div class="panel-body">
+            <form id="vmAdd" action="#0" v-on:submit.prevent="submit">
+              
+              <div class="form-group">
+                <label>A:</label>
+                <input type="text" v-model="a" class="form-control" placeholder="Enter A">
+              </div>
+
+              
+              <button type="submit" class="btn btn-default">Add</button>
+            
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+    <div id="show" class="jumbotron">{[ a ]}</div>
     <ul class="list-group list-group-flush">
         <li class="list-group-item" v-for="account in accounts">{[account]}</li>
     </ul>
+
+
 
 
 </div>

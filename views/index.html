@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 
+
+{% block body %}
+
+<div class="col-12" id="divLoginOrJoin">
+    {% include "login_or_join.html" %}
+</div>
+
+<div class="d-none d-lg-block col-lg-2 f-center" >
+    {% include "left_nav.html" %}
+</div>
+
+<div class="col-12 col-lg-10 f-hide" id="divMain">
+    {% include "main.html" %}
+</div>
+{% endblock %} 
+
+
 {% block script %}
     <script src="/static/js/index.js"></script>
 {% endblock %}
-
-{% block main %}
-
-    <button id="btnTest">测试</button>
-    
-
-{% endblock %} 

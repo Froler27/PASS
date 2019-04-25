@@ -1,0 +1,42 @@
+<div class="row align-items-center justify-content-lg-center">
+    <div class="col">
+        <div id="login-or-join" class="f-center">
+            <h1>PASS</h1>
+            <button type="button" class="btn btn-outline-dark" v-on:click="login">登录</button>
+            <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#joinModal" data-whatever="@mdo">注册</button>               
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            
+            <div class="modal-header">
+            <h5 class="modal-title" id="joinModalLabel">请填写信息</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            
+            <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="userName" class="col-form-label">姓名：</label>
+                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="姓名必须填写！" type="text" class="form-control" id="userName" placeholder="请输入你的名字" required>
+                </div>
+                <div class="form-group">
+                    <label for="personalWords" class="col-form-label">个性签名：</label>
+                    <textarea class="form-control" id="personalWords" placeholder="请写下你喜欢的一句话"></textarea>
+                </div>
+            </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" v-on:click="join">注册</button>
+            </div>
+            
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-pragma solidity >=0.4.21 <0.7.0;
+import "./Certification.sol";
 
 library CommonFun{
     // /** 动态删除一个数组元素 */
@@ -6,6 +6,8 @@ library CommonFun{
     //     return true;
     // }
 }
+
+
 
 /** @title 认证 */
 contract Authentication {
@@ -18,18 +20,19 @@ contract Authentication {
         string details;                             // 证书详细内容
     }
 
-    struct User{                                    // 用户
-        string name;                                // 用户名称
+    struct User{                                    
         uint balance;                               // 账户 PASS币 余额
         Certification[] acquiredCerts;              // 已经获得的证书
         Certification[] applyingCerts;              // 正在申请的证书
         Certification[] certTemps;                  // 自定义的证书
     }
 
-    struct Organization {                           // 组织
+    // 组织的数据结构
+    struct Organization {                           
         string name;                                // 组织的名称
-        address[] owners;                           // 组织创建者，可解散组织，管理成员，以及组织成员的所有权限
-        address[] members;                          // 组织成员，可颁发证书，邀请成员，退出组织
+        address creator;                            // 组织创建者
+        address[] admins;                           // 组织管理者
+        address[] members;                          // 组织成员
 
         mapping(string => uint) typeOfCert; 
 
@@ -39,7 +42,8 @@ contract Authentication {
 
     mapping(address => User) users;                 // 记录用户数据
     Organization[] organizations;                   // 记录已创建的组织
-    Certification[] certTemps;                      // 记录证书的类型
+    Certification[] certTemps;                      // 存储证书的模板
+    
     
 
     /** @dev 为用户创建一个账户
@@ -70,6 +74,12 @@ contract Authentication {
         return true;
     }
 
+    /** @dev 获取用户的信息
+     */
+    function getUserInfo(address user) public view returns (string memory) {
+
+        return users[user].name;
+    }
 
     /** @dev 查看用户获得的证书
      */
