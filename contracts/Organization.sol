@@ -5,7 +5,9 @@ contract Organization{
     address creator;
     address[] admins;
     address[] members;
-    uint createTime;   
+    uint createTime;  
+
+    string[] certs; 
 
     constructor(
         string memory _name
@@ -114,4 +116,7 @@ contract Organization{
         delete members[i];
         return true;
     }
+
+    //--------------------------------------
+
 }

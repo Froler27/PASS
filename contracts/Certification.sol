@@ -5,7 +5,8 @@ contract Certification{
     string body; 
     
     address owner;      // 证书获得者
-    address origin;     // 证书颁发者
+    address origin;     // 证书的来源
+    address sender;     // 证书的发送者
 
     uint receiptTime;   // 实际获得证书的时间
     uint overdueTime;   // 证书的有效期限
@@ -15,15 +16,17 @@ contract Certification{
         string memory _name, 
         string memory _body, 
         address _owner,
+        address _origin,
         uint _receiptTime,
         uint _overdueTime
     ) public{
         name = _name;
         body = _body;
         owner = _owner;
+        origin = _origin;
         receiptTime = _receiptTime;
         overdueTime = _overdueTime;
-        origin = msg.sender;
+        sender = msg.sender;
         recordTime = now;
     }
 

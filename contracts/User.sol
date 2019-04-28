@@ -3,22 +3,17 @@ pragma solidity >=0.4.21 <0.7.0;
 import "./Organization.sol";
 
 contract User{
-    string name;
+    string realName;
     string IDCardNum;
     address myself;
     uint registerTime; 
 
-    Organization[] ownOrg;          // 用户创建的组织
-    Organization[] adminOrg;        // 用户管理的组织
-    Organization[] memberOrg;       // 用户加入的组织
+    string[] ownOrgs;          // 用户创建的组织
+    string[] adminOrgs;        // 用户管理的组织
+    string[] memberOrgs;       // 用户加入的组织
 
 
-    constructor(
-        string memory _name,
-        string memory _IDCardNum
-    ) public{
-        name = _name;
-        IDCardNum = _IDCardNum;
+    constructor() public{
         myself = msg.sender;
         registerTime = now;
     }
@@ -31,95 +26,82 @@ contract User{
         _;
     }
 
-    modifier onlyAdmin{     // 包含了 creator 与 admin
-        require(
-            findAdmin(msg.sender) != admins.length || msg.sender == creator,
-            "Only the creator can use this function!"
-        );
-        _;
+    function strcmp(string memory _str1, string memory _str2) public pure returns(bool) {
+        return keccak256(abi.encodePacked(_str1)) == keccak256(abi.encodePacked(_str2));
     }
 
     function getName() public view returns(string memory){
-        return name;
+        return realName;
     }
 
-    function getCreator() public view returns(address){
-        return creator;
-    }
 
-    function getAdmins() public view returns(address[] memory){
-        return admins;
-    }
-
-    function getMembers() public view returns(address[] memory){
-        return members;
-    }
-
-    function getCreatedTime() public view returns(uint){
-        return createdTime;
-    }
-
-    //------------------------------------------------------------
-
-    function findAdmin(address admin) public view returns(uint){
+    function findOwnOrg(string memory ownOrg) public view returns(uint){
         uint i;
-        for(i=0; i<admins.length; i++)
-            if(admin == admins[i])
+        for(i=0; i<ownOrgs.length; i++)
+            if(strcmp(ownOrg, ownOrgs[i]))
                 return i;
         return i;
     }
 
-    function addAdmin(address admin) onlyCreator public {
-        require(
-            findAdmin(admin) == admins.length,
-            "This user is already admin!"
-        );
-        admins.push(admin);
+    function findAdminOrg(string memory adminOrg) public view returns(uint){
+        uint i;
+        for(i=0; i<adminOrgs.length; i++)
+            if(strcmp(adminOrg, adminOrgs[i]))
+                return i;
+        return i;
     }
 
-    /** @dev 删除组织管理者
-     *  @param admin 被删除者的地址
-     *  @return 删除成功返回 true，否则返回 false
-     */
-    function deleteAdmin(address admin) onlyCreator public returns(bool){
-        uint i = findAdmin(admin);
+    function findMemberOrg(string memory memberOrg) public view returns(uint){
+        uint i;
+        for(i=0; i<memberOrgs.length; i++)
+            if(strcmp(memberOrg, memberOrgs[i]))
+                return i;
+        return i;
+    }
+    
+    //---------------------------------------------------
+
+    function addOwnOrg(string memory ownOrg) public {
+        ownOrgs.push(ownOrg);
+    }
+
+    function addAdminOrg(string memory _orgName) public {
+        adminOrgs.push(_orgName);
+    }
+
+    function addMemberOrg(string memory _orgName) public {
+        memberOrgs.push(_orgName);
+    }
+
+    //-----------------------------------------------------
+
+    function deleteOwnOrg(string memory ownOrg) public  returns(bool){
+        uint i = findOwnOrg(ownOrg);
         require(
-            i != admins.length,
-            "This user is not admin!"
+            i != ownOrgs.length,
+            "You don't own this org!"
         );
-        delete admins[i];
+        delete ownOrgs[i];
         return true;
     }
 
-    //---------------------------------------------------------------
-
-    function findMember(address member) public view returns(uint){
-        uint i;
-        for(i=0; i<members.length; i++)
-            if(member == members[i])
-                return i;
-        return i;
+    function deleteAdminOrg(string memory adminOrg) public returns(bool){
+        uint i = findOwnOrg(adminOrg);
+        require(
+            i != adminOrgs.length,
+            "You are not admin of this org!"
+        );
+        delete adminOrgs[i];
+        return true;
     }
 
-    function addMember(address member) onlyAdmin public{
+    function deleteMemberOrg(string memory memberOrg) public returns(bool){
+        uint i = findOwnOrg(memberOrg);
         require(
-            findMember(member) == members.length,
-            "This user is already member!"
+            i != memberOrgs.length,
+            "You are not member of this org!"
         );
-        members.push(member);
-    }
-
-    /** @dev 删除组织成员
-     *  @param member 被删除者的地址
-     *  @return 删除成功返回 true，否则返回 false
-     */
-    function deleteMember(address member) onlyAdmin public returns(bool){
-        uint i = findMember(member);
-        require(
-            i != members.length,
-            "This user is not member!"
-        );
-        delete members[i];
+        delete memberOrgs[i];
         return true;
     }
 }
