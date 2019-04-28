@@ -65,17 +65,17 @@ contract User{
         ownOrgs.push(ownOrg);
     }
 
-    function addAdminOrg(string memory _orgName) public {
-        adminOrgs.push(_orgName);
+    function addAdminOrg(string memory orgName) public {
+        adminOrgs.push(orgName);
     }
 
-    function addMemberOrg(string memory _orgName) public {
-        memberOrgs.push(_orgName);
+    function addMemberOrg(string memory orgName) public {
+        memberOrgs.push(orgName);
     }
 
     //-----------------------------------------------------
 
-    function deleteOwnOrg(string memory ownOrg) public  returns(bool){
+    function deleteOwnOrg(string memory ownOrg) public returns(bool){
         uint i = findOwnOrg(ownOrg);
         require(
             i != ownOrgs.length,

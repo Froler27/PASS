@@ -8,6 +8,7 @@ contract Organization{
     uint createTime;  
 
     string[] certs; 
+    mapping(string => address[]) certToUsers;
 
     constructor(
         string memory _name
@@ -33,29 +34,29 @@ contract Organization{
         _;
     }
 
-    function getName() public view returns(string memory){
+    function getName () public view returns (string memory) {
         return name;
     }
 
-    function getCreator() public view returns(address){
+    function getCreator () public view returns (address) {
         return creator;
     }
 
-    function getAdmins() public view returns(address[] memory){
+    function getAdmins () public view returns (address[] memory) {
         return admins;
     }
 
-    function getMembers() public view returns(address[] memory){
+    function getMembers () public view returns (address[] memory) {
         return members;
     }
 
-    function getCreatedTime() public view returns(uint){
+    function getCreatedTime () public view returns (uint) {
         return createTime;
     }
 
     //------------------------------------------------------------
 
-    function findAdmin(address admin) public view returns(uint){
+    function findAdmin (address admin) public view returns (uint) {
         uint i;
         for(i=0; i<admins.length; i++)
             if(admin == admins[i])
@@ -63,7 +64,7 @@ contract Organization{
         return i;
     }
 
-    function addAdmin(address admin) onlyCreator public {
+    function addAdmin (address admin) onlyCreator public {
         require(
             findAdmin(admin) == admins.length,
             "This user is already admin!"
@@ -75,7 +76,7 @@ contract Organization{
      *  @param admin 被删除者的地址
      *  @return 删除成功返回 true，否则返回 false
      */
-    function deleteAdmin(address admin) onlyCreator public returns(bool){
+    function deleteAdmin (address admin) onlyCreator public returns (bool) {
         uint i = findAdmin(admin);
         require(
             i != admins.length,
@@ -87,7 +88,7 @@ contract Organization{
 
     //---------------------------------------------------------------
 
-    function findMember(address member) public view returns(uint){
+    function findMember (address member) public view returns (uint) {
         uint i;
         for(i=0; i<members.length; i++)
             if(member == members[i])
@@ -95,7 +96,7 @@ contract Organization{
         return i;
     }
 
-    function addMember(address member) onlyAdmin public{
+    function addMember (address member) onlyAdmin public {
         require(
             findMember(member) == members.length,
             "This user is already member!"
@@ -107,7 +108,7 @@ contract Organization{
      *  @param member 被删除者的地址
      *  @return 删除成功返回 true，否则返回 false
      */
-    function deleteMember(address member) onlyAdmin public returns(bool){
+    function deleteMember (address member) onlyAdmin public returns (bool) {
         uint i = findMember(member);
         require(
             i != members.length,
