@@ -30,8 +30,20 @@ contract User{
         return keccak256(abi.encodePacked(_str1)) == keccak256(abi.encodePacked(_str2));
     }
 
-    function getName() public view returns(string memory){
+    function getRealName() public view returns(string memory){
         return realName;
+    }
+    
+    function getIDCardNum() public view returns(string memory){
+        return IDCardNum;
+    }
+
+    function setRealName(string memory _realName) public {
+        realName = _realName;
+    }
+
+    function setIDCardNum(string memory _IDCardNum) public {
+        IDCardNum = _IDCardNum;
     }
 
 

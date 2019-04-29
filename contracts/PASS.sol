@@ -19,7 +19,7 @@ contract PASS{
         _;
     }
 
-    function strcmp(string memory _str1, string memory _str2) public pure returns(bool) {
+    function strcmp(string memory _str1, string memory _str2) private pure returns(bool) {
         return keccak256(abi.encodePacked(_str1)) == keccak256(abi.encodePacked(_str2));
     }
 
@@ -51,6 +51,14 @@ contract PASS{
 
     //-----------------------------
 
+    function getUserInfo (uint i) public returns (User){
+
+    }
+
+
+
+
+
     function addAdminToOrg(address admin, string memory orgName) public{
         require(
             orgs[orgName].getCreator() == admin,
@@ -69,8 +77,21 @@ contract PASS{
 
     }
 
-    // 添加组织可颁发证书
-    function addCertToOrg() public {
 
-    }
+    // 添加组织可颁发证书
+    // function addCertToOrg (string memory orgName, string memory string) public {
+    //     require(
+    //         , 
+    //         ""
+    //     );
+    // }
+
+    // function orgIssueCertToUser (string memory orgName, string memory cert, address user) public {
+    //     require(_orgs[orgName], "This organization has not been created!");
+    //     orgs[orgName].issueCert(certName, user);
+    // }
+
+    // function userReceiveCert (string memory orgName, string memory cert) public {
+    //     orgs[org]
+    // }
 }
