@@ -38,6 +38,14 @@ contract User{
         return IDCardNum;
     }
 
+    function getMyself() public view returns(address){
+        return myself;
+    }
+
+    function getRegisterTime() public view returns(uint){
+        return registerTime;
+    }
+
     function setRealName(string memory _realName) public {
         realName = _realName;
     }

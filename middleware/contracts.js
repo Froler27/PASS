@@ -14,7 +14,7 @@ function contracts(){
     // 设置连接的区块链结点
     var web3Provider = new Web3.providers.HttpProvider('http://127.0.0.1:9545');
     console.log("连接到区块链节点：" + 'http://127.0.0.1:9545');
-    console.log(web3Provider);
+    // console.log(web3Provider);
     // 创建 web3 对象
     var web3 = new Web3(web3Provider);
 
