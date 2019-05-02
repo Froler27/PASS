@@ -4,20 +4,26 @@ function showError(resp) {
     });
 }
 
+const GAS = 6721975;
+
 var vm = new Vue({
     el: '#body-div',
-    delimiters: ['{[', ']}'],
-
-    http: {
-        timeout: 5000
-    },
-
     data: {
+        web3Provider: null,
+        contracts: {},
         show_login_or_join: true,
         show_left_nav: false,
         show_main: false,
         show_nav:false,
-        loading: false
+        loading: false,
+        userAdr: "",
+        nickName:'F'
+    },
+
+    delimiters: ['{[', ']}'],
+
+    http: {
+        timeout: 5000
     },
 
     created: function () {
@@ -25,47 +31,112 @@ var vm = new Vue({
     },
 
     methods: {
-        init: function () {
-            var that = this;
-            that.$resource('/api/todos').get().then(function (resp) {
-                that.loading = false;
-                // 调用API成功时调用json()异步返回结果:
-                resp.json().then(function (result) {
-                    // 更新VM的todos:
-                    that.todos = result.todos;
-                });
-            }, function (resp) {
-                that.loading = false;
-                // 调用API失败:
-                // alert('error');
-                showError(resp);
+        init: async function () {
+            $('#userNickName').popover('disable');
+
+            web3.eth.getAccounts(function(error, accounts){
+                if(error) {
+                    console.log(error);
+                }
+                var account = accounts[0];
+                console.info(account);
             });
-            $('#userName').popover('disable');
+
+            return await this.initWeb3();
         },
 
-        join: function () {
-            var $userName = $('#userName');
-            if(! $userName.val().trim()){
-                $userName.popover('enable').popover('show').focus();
+        initWeb3: async function() {
+            this.web3Provider = new Web3.providers.HttpProvider('http://127.0.0.1:9545');
+            console.info("连接到 http://127.0.0.1:9545");
+            web3 = new Web3(this.web3Provider);
+    
+            return this.initContract();
+        },
+
+        initContract: function() {
+            var that = this;
+            $.getJSON('/static/PASS.json', function(data) {
+                // Get the necessary contract artifact file and instantiate it with truffle-contract.
+                var PASSArtifact = data;
+                that.contracts.PASS = TruffleContract(PASSArtifact);
+                
+                // Set the provider for our contract.
+                that.contracts.PASS.setProvider(that.web3Provider);
+                
+
+                // 初始化宠物领养信息
+                //return App.markAdopted();
+            });
+        
+            // 注册宠物领养事件
+            //return that.bindEvents();
+        },
+
+        register: function () {
+            var PASSInstance;
+            var that = this;
+            var $userNickName = $('#userNickName');
+            if(! $userNickName.val().trim()){
+                $userNickName.popover('enable').popover('show').focus();
                 setTimeout(function () {
-                    $userName.popover('hide').popover('disable');
+                    $userNickName.popover('hide').popover('disable');
                 }, 2000);
             }else{
                 console.log("正在注册...");
-                $('#joinModal').modal('hide');
-                $('#divLoginOrJoin').addClass('f-hide');
-                $('#nav').removeClass('f-hide');
-                $('#left-nav-tab').removeClass('f-hide');
-                $('#divMain').removeClass('f-hide');
+
+                that.contracts.PASS.deployed().then(function(instance) {
+                    console.log('---------------1');
+                    PASSInstance = instance;  // 获取智能合约对象
+            
+                    return PASSInstance.register( $userNickName.val().trim(), {gas: GAS});
+                }).then(function(res) {
+                    console.log(res+'---------注册成功------2');
+                    that.nickName = res;
+
+                    $('#joinModal').modal('hide');
+                    $('#divLoginOrJoin').addClass('f-hide');
+                    $('#nav').removeClass('f-hide');
+                    $('#left-nav-tab').removeClass('f-hide');
+                    $('#divMain').removeClass('f-hide');
+                }).catch(function(err) {
+                    console.log('-------注册失败--------3');
+                    console.log(err.message);
+                    var $repeatRegisterAlert = $("#repeatRegisterAlert");
+                    $repeatRegisterAlert.addClass('show');
+                    setTimeout(function () {
+                        $repeatRegisterAlert.removeClass('show');
+                    }, 3000);
+                });
+
+                
             }
         },
 
         login: function () {
             console.log("正在登录...");
+
+            var PASSInstance;
+            var that = this;
+
+            that.contracts.PASS.deployed().then(function(instance) {
+                console.log('---------------1');
+                PASSInstance = instance;  // 获取智能合约对象
+        
+                return PASSInstance.getSelfAdr();
+            }).then(function(res) {
+                console.log(res+'---------------2');
+                that.nickName = res;
+                
+            }).catch(function(err) {
+                console.log('---------------3');
+                console.log(err.message);
+            });
+
             $('#divLoginOrJoin').addClass('f-hide');
             $('#nav').removeClass('f-hide');
             $('#left-nav-tab').removeClass('f-hide');
             $('#divMain').removeClass('f-hide');
+            
         },
 
 
@@ -117,6 +188,7 @@ var vm = new Vue({
 
     }
 });
+
 window.vm = vm;
 
 // var vmAdd = new Vue({

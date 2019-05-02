@@ -72,7 +72,7 @@ const App = new Vue({
                 PASSInstance = instance;  // 获取智能合约对象
         
                 console.log(instance + '-------------------');
-                return PASSInstance.register("Froler");
+                return PASSInstance.register("Froler", {gas: 6721975});
                 // return adoptionInstance.transfer(toAddress, amount, {from: account, gas: 100000});
             }).then(function(res) {
                 console.log(res+'---------------2');
@@ -94,6 +94,28 @@ const App = new Vue({
                 // 调用领养的方法，主要实现宠物领养的功能
                 console.log(instance + '-------------------');
                 return PASSInstance.test();
+                // return adoptionInstance.transfer(toAddress, amount, {from: account, gas: 100000});
+            }).then(function(res) {
+                console.log(res+'---------------2');
+                that.realName = res;
+            }).catch(function(err) {
+                console.log('---------------3');
+                console.log(err.message);
+            });
+        
+        
+            console.info("getName........");
+        },
+
+        getAllUsers: function(){
+            var PASSInstance;
+            var that = this;
+            
+            that.contracts.PASS.deployed().then(function(instance) {
+                console.log('---------------1');
+                PASSInstance = instance;  // 获取智能合约对象
+    
+                return PASSInstance.getAllUsers();
                 // return adoptionInstance.transfer(toAddress, amount, {from: account, gas: 100000});
             }).then(function(res) {
                 console.log(res+'---------------2');

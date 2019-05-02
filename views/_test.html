@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 
 {% block script %}
-    <script src="/static/js/web3.min.js"></script>
-    <script src="/static/js/truffle-contract.js"></script>
     <script src="/static/js/_test.js"></script>
 {% endblock %}
 
 {% block body %}
 <div id="_test">
-    <h1>{[ realName ]}</h1>
+    <p>{[ realName ]}</p>
     <button id="btn" type="button" class="btn btn-primary" v-on:click="getName">获取</button>
     <button id="btnRegister" type="button" class="btn btn-primary" v-on:click="register">注册</button>
+    <button id="btnGetAllUsers" type="button" class="btn btn-primary" v-on:click="getAllUsers">getAllUsers</button>
 
 </div>
 {% endblock %} 

@@ -42,6 +42,10 @@ contract PASS{
         usersAdrs.push(msg.sender);
     }
 
+    function getSelfAdr() public view returns(address){
+        return msg.sender;
+    }
+
     //-----------------------------------------------------------------------
 
     /** @dev 获取所有用户的地址
