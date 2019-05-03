@@ -1,12 +1,82 @@
 pragma solidity >=0.4.21 <0.7.0;
 
-import "./Certification.sol";
-
 contract PASS{
 
     function strcmp(string memory _str1, string memory _str2) private pure returns(bool) {
         return keccak256(abi.encodePacked(_str1)) == keccak256(abi.encodePacked(_str2));
     }
+
+    struct Certification {
+        string name;
+        string body; 
+        uint status;        // 证书的状态
+        // 0 表示无
+        // 1 已成功颁发并生效
+        // 2 等待用户接受
+        // 3 用户拒绝接受
+        // 4 证书已失效
+        
+        address owner;      // 证书获得者
+        string origin;      // 证书的来源(组织)
+        address sender;     // 证书的颁发者
+
+        uint receiptTime;   // 接收证书的时间
+        uint overdueTime;   // 证书的有效期限
+        uint sendTime;      // 证书在平台上颁发的时间
+    }
+
+    Certification[] certs;
+
+    function createCert(string memory certName, string memory certBody, address user, string memory origin, uint overdueTime) public returns(uint){
+        Certification memory cert;
+        cert.name = certName;
+        cert.body = certBody;
+        cert.owner = user;
+        cert.origin = origin;
+        cert.overdueTime = overdueTime;
+        cert.sender = msg.sender;
+        certs.push(cert);
+
+        return certs.length-1;
+    }
+
+    function getCertName(uint i) public view returns(string memory) {
+        return certs[i].name;
+    }
+
+    function getCertBody(uint i) public view returns(string memory) {
+        return certs[i].body;
+    }
+
+    function getCertStatus(uint i) public view returns(uint) {
+        return certs[i].status;
+    }
+
+    function getCertOwner(uint i) public view returns(address) {
+        return certs[i].owner;
+    }
+
+    function getCertOrigin(uint i) public view returns(string memory) {
+        return certs[i].origin;
+    }
+
+    function getCertSender(uint i) public view returns(address) {
+        return certs[i].sender;
+    }
+
+    function getCertReceiptTime(uint i) public view returns(uint) {
+        return certs[i].receiptTime;
+    }
+
+    function getCertOverdueTime(uint i) public view returns(uint) {
+        return certs[i].overdueTime;
+    }
+
+    function getCertSendTime(uint i) public view returns(uint) {
+        return certs[i].sendTime;
+    }
+
+    //##########################################################
 
     struct User {
         string nickName;
@@ -18,6 +88,8 @@ contract PASS{
         string[] ownOrgs;          // 用户创建的组织
         string[] adminOrgs;        // 用户管理的组织
         string[] memberOrgs;       // 用户加入的组织
+
+        uint[] ownCerts;
     }
 
     modifier onlyUsers{
@@ -167,6 +239,17 @@ contract PASS{
 
     //=====================================================================
 
+    struct applyInfo{
+        address applicant;
+        uint certSite;
+        uint applyTime;
+        uint status;
+        // 0 无
+        // 1 已查看
+        // 2 未查看
+        // 3 已同意
+        // 4 已拒绝
+    }
 
     struct Organization{       
         address creator;
@@ -177,12 +260,9 @@ contract PASS{
 
         string[] certs; 
         mapping(string => address[]) certToUsers;
-        mapping(string => mapping(address => uint)) statusOfCert;      // 证书的状态
-        // 0 表示无
-        // 1 已成功颁发
-        // 2 等待用户接受
-        // 3 用户拒绝接受
-        // 4 证书已失效
+        mapping(string => mapping(address => uint)) certID;
+
+        applyInfo[] infos;
     }
 
     string[] orgNames;
@@ -230,6 +310,10 @@ contract PASS{
 
     function getOrgCreatedTime (string memory orgName) public view returns (uint) {
         return orgs[orgName].createTime;
+    }
+
+    function getOrgExist(string memory orgName) public view returns(bool) {
+        return orgs[orgName].exist;
     }
 
     //====================================================================
@@ -344,8 +428,34 @@ contract PASS{
 
     //     orgs[orgName].addAdmin(admin);
     // }
+
+
+    function receiveCert(uint certID) public {
+        require(
+            certs[certID].owner == msg.sender,
+            "Only the gainer of the cert can receive it!"
+        );
+        certs[certID].status = 1;
+    }
+
+    function rejectCert(uint certID) public {
+        require(
+            certs[certID].owner == msg.sender,
+            "Only the gainer of the cert can reject it!"
+        );
+        certs[certID].status = 3;
+    }
+
+    function applyCertToOrg(string memory certName, string memory orgName) public {
+        require(
+            orgs[orgName].exist,
+            "This org has not been created!"
+        );
+    }
     
     function test() public view returns (string memory){
         return users[msg.sender].nickName;
     }
+
+
 }
