@@ -22,8 +22,8 @@
             <div class="modal-body">
             <form>
                 <div class="form-group">
-                    <label for="userName" class="col-form-label">姓名：</label>
-                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="姓名必须填写！" type="text" class="form-control" id="userName" placeholder="请输入你的名字" required>
+                    <label for="userName" class="col-form-label">昵称：</label>
+                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="昵称必须填写！" type="text" class="form-control" id="userNickName" placeholder="请输入你的昵称" required>
                 </div>
                 <div class="form-group">
                     <label for="personalWords" class="col-form-label">个性签名：</label>
@@ -34,9 +34,19 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-success" v-on:click="join">注册</button>
+                <button type="button" class="btn btn-success" v-on:click="register">注册</button>
             </div>
             
         </div>
     </div>
+
+    <div class="row justify-content-md-center">
+        <div class="col-lg-6">
+            <div id="repeatRegisterAlert"  class="alert alert-danger fade" role="alert">
+                您已经注册过了！请不要重复注册！
+            </div>
+        </div>
+    </div>
+
 </div>
+

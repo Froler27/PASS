@@ -83,8 +83,8 @@ var data = {
     a: "未取得"
 }
 
-// window.onload = function (){
-// $(document).ready(function(){
+//window.onload = function (){
+$(document).ready(function(){
 
 const testApp = new Vue({
     el: '#divTest',
@@ -136,6 +136,10 @@ const testApp = new Vue({
                 e.target.innerText = todo[prop];
                 showError(resp);
             });
+        },
+
+        kkk: function (){
+            getAccounts();
         }
     }
     
@@ -143,11 +147,11 @@ const testApp = new Vue({
 
 
 
-var btn = document.getElementById('btn');
+//var btn = document.getElementById('btn');
 //var btnJoin = document.getElementById('btn-join');
 
-btn.addEventListener('click', getAccounts, false);
+//btn.addEventListener('click', getAccounts, false);
 //btnJoin.addEventListener('click', getA, false);
 //$('#btn-join').on('click', testApp.getA, false);
     
-//});
+});
