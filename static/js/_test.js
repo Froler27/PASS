@@ -3,7 +3,11 @@ const App = new Vue({
     data: {
         web3Provider: null,
         contracts: {},
-        realName: 'none'
+        realName: 'wu',
+        orgs: {
+            amount: 0,
+            orgNames: []
+        }
     },
     delimiters: ['{[', ']}'],
     created: function (){
@@ -127,6 +131,34 @@ const App = new Vue({
         
         
             console.info("getName........");
+        },
+
+        getAllOrgNames: function(){
+            var PASSInstance;
+            var that = this;
+            that.contracts.PASS.deployed().then(function(instance) {
+                console.log('---------------1');
+                PASSInstance = instance;  // 获取智能合约对象
+                
+                return PASSInstance.getOrgNum();
+                // return adoptionInstance.transfer(toAddress, amount, {from: account, gas: 100000});
+            }).then(function(res) {
+                console.log(res+'---------------2');
+                that.orgs.amount = res;
+                var i;
+                for(i=1; i<res; i++){
+                    PASSInstance.getOrgName().then(function(name) {
+                        if(name)
+                            that.orgs.orgNames.push(res);
+                    }).catch(function(err) {
+                        console.log("error: "+err.message);
+                        console.log("已获得所有的组织名称。");
+                    })
+                }
+            }).catch(function(err) {
+                console.log('---------------3');
+                console.log(err.message);
+            });
         },
         
         markAdopted: function(adopters, account) {
