@@ -25,7 +25,7 @@ contract PASS{
         uint sendTime;      // 证书在平台上颁发的时间
     }
 
-    Certification[] certs;
+    Certification[] certs;  // 存储证书实例
 
     function createCert(string memory certName, string memory certBody, address user, string memory origin, uint overdueTime) public returns(uint){
         Certification memory cert;
@@ -90,6 +90,7 @@ contract PASS{
         string[] memberOrgs;       // 用户加入的组织
 
         uint[] ownCerts;
+        uint[] applyInfos;
     }
 
     modifier onlyUsers{
@@ -239,9 +240,9 @@ contract PASS{
 
     //=====================================================================
 
-    struct applyInfo{
+    struct ApplyInfo{
         address applicant;
-        uint certSite;
+        uint orgCertID;
         uint applyTime;
         uint status;
         // 0 无
@@ -250,6 +251,10 @@ contract PASS{
         // 3 已同意
         // 4 已拒绝
     }
+    
+    ApplyInfo[] infos;
+
+    
 
     struct Organization{       
         address creator;
@@ -262,7 +267,7 @@ contract PASS{
         mapping(string => address[]) certToUsers;
         mapping(string => mapping(address => uint)) certID;
 
-        applyInfo[] infos;
+        uint[] infos;
     }
 
     string[] orgNames;
@@ -290,25 +295,50 @@ contract PASS{
         _;
     }
 
+    modifier existOrg(string memory orgName) {
+        require(
+            orgs[orgName].exist,
+            "This org has not been created!"
+        );
+        _;
+    }
+
     //-----------------------------------------------------------------------
 
     function getOrgName (uint i) public view returns(string memory){
+        assert(i < orgNames.length);
         return orgNames[i];
     }
 
-    function getOrgCreator (string memory orgName) public view returns(address) {
+    function getOrgCertName (string memory orgName, uint i) public view existOrg(orgName) returns(string memory) {
+        return orgs[orgName].certs[i];
+    }
+
+    function getOrgCertID (string memory orgName, string memory certName) public view existOrg(orgName) returns(uint) {
+        uint i;
+        for(i=0; i<orgs[orgName].certs.length; i++)
+            if(strcmp(certName, orgs[orgName].certs[i]))
+                return i;
+        return i;
+    }
+
+    function judgeOrgCertExist (string memory orgName, string memory certName) public view returns (bool) {
+        return getOrgCertID(orgName, certName) < orgs[orgName].certs.length;
+    }
+
+    function getOrgCreator (string memory orgName) public view existOrg(orgName) returns(address) {
         return orgs[orgName].creator;
     }
 
-    function getOrgAdmins (string memory orgName) public view returns (address[] memory) {
+    function getOrgAdmins (string memory orgName) public view existOrg(orgName) returns (address[] memory) {
         return orgs[orgName].admins;
     }
 
-    function getOrgMembers (string memory orgName) public view returns (address[] memory) {
+    function getOrgMembers (string memory orgName) public view existOrg(orgName) returns (address[] memory) {
         return orgs[orgName].members;
     }
 
-    function getOrgCreatedTime (string memory orgName) public view returns (uint) {
+    function getOrgCreatedTime (string memory orgName) public view existOrg(orgName) returns (uint) {
         return orgs[orgName].createTime;
     }
 
@@ -446,12 +476,54 @@ contract PASS{
         certs[certID].status = 3;
     }
 
+    //------------------------Apply------------------------------
+
     function applyCertToOrg(string memory certName, string memory orgName) public {
+        uint i = getOrgCertID(orgName, certName);
         require(
-            orgs[orgName].exist,
-            "This org has not been created!"
+            i < orgs[orgName].certs.length,
+            "This org don't have this cert!"
         );
+        ApplyInfo memory applyInfo;
+        applyInfo.applicant = msg.sender;
+        applyInfo.orgCertID = i;
+        applyInfo.applyTime = now;
+        applyInfo.status = 2;
+
+        infos.push(applyInfo);
+        users[msg.sender].applyInfos.push(infos.length - 1);
+        orgs[orgName].infos.push(infos.length - 1);
     }
+
+    function getUserApplyInfosID () public view returns(uint[] memory) {
+        return users[msg.sender].applyInfos;
+    }
+
+    function getOrgApplyInfosID (string memory orgName) public view returns(uint[] memory) {
+        return orgs[orgName].infos;
+    }
+
+    function getApplyDetail(uint i) public view returns(uint[3] memory){
+        uint[3] memory args;
+        args[0] = infos[i].orgCertID;
+        args[1] = infos[i].applyTime;
+        args[2] = infos[i].status;
+        return args;
+    }
+
+    function orgChecksInfo(string memory orgName, uint applyInfoID) public {
+        uint i = orgs[orgName].infos[applyInfoID];
+        infos[i].status = 1;
+    }
+
+    //==========================Apply==========================
+
+
+    //function getOrgApplyID (string memory orgName, )
+
+    //function getApplyStatus (string memory orgName, )
+
+    //function checkApply (string memory )
     
     function test() public view returns (string memory){
         return users[msg.sender].nickName;
