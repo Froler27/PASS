@@ -43,17 +43,6 @@ contract PASS{
         return certs[i].status;
     }
 
-    // function getCertOwner(uint i) private view returns(address) {
-    //     return certs[i].owner;
-    // }
-
-    // function getCertOrigin(uint i) private view returns(string memory) {
-    //     return certs[i].origin;
-    // }
-
-    // function getCertSender(uint i) private view returns(address) {
-    //     return certs[i].sender;
-    // }
 //========================cert================================
 
     struct Invitation {
@@ -103,7 +92,7 @@ contract PASS{
 
     function register(string memory userinfo) public {
         require(                        // 要求用户未注册过
-            !(userIDs[msg.sender] > 0 && userIDs[msg.sender] < users.length),
+            !(userIDs[msg.sender] >= 0 && userIDs[msg.sender] < users.length),
             "Don't register again!"
         );
         User memory user;
@@ -114,11 +103,11 @@ contract PASS{
         users.push(user);
     }
 
-    // function getSelfAdr() public view returns(address){
-    //     return msg.sender;
-    // }
+    function getSelfAdr() public view returns(address){
+        return msg.sender;
+    }
 
-    function getUserinfo(address userAdr) public view returns(string memory) {
+    function getUserinfo(address userAdr) public view onlyUsers returns(string memory) {
         return users[userIDs[userAdr]].userinfo;
     }
 
@@ -181,31 +170,6 @@ contract PASS{
         users[userIDs[msg.sender]].ownOrgs.push(orgIDs[orgName]);
     }
 
-    // modifier onlyCreator(string memory orgName) {
-    //     require(
-    //         msg.sender == orgs[orgIDs[orgName]].creator,
-    //         "Only the creator of the org can use this function!"
-    //     );
-    //     _;
-    // }
-
-    // modifier existOrg(string memory orgName) {
-    //     require(
-    //         orgIDs[orgName] > 0 && orgIDs[orgName] < orgs.length,
-    //         "This org has not been created!"
-    //     );
-    //     _;
-    // }
-
-    // function getOrgExist(string memory orgName) private view returns(bool) {
-    //     return orgIDs[orgName] > 0 && orgIDs[orgName] < orgs.length;
-    // }
-
-    // function getOrgName(uint i) public view returns (string memory) {
-    //     assert(i < orgs.length);
-    //     return orgs[i].name;
-    // }
-
     // tag != 0 时返回组织可颁发证书信息
     function getOrginfo (uint tag, uint i, string memory orgName) public view returns(string memory) {
         if(tag == 0){
@@ -239,17 +203,6 @@ contract PASS{
         orgs[orgIDs[orgName]].certs.push(certName);
     }
 
-    // function getOrgCertID (string memory orgName, string memory certName) private view existOrg(orgName) returns(uint) {
-    //     uint i;
-    //     for( i = 0; i < orgs[orgIDs[orgName]].certs.length ; i++)
-    //         if(strcmp(certName, orgs[orgIDs[orgName]].certs[i]))
-    //             return i;
-    //     return i;
-    // }
-
-    // function judgeOrgCertExist (string memory orgName, string memory certName) private view returns (bool) {
-    //     return getOrgCertID(orgName, certName) < orgs[orgIDs[orgName]].certs.length;
-    // }
 
     function getOrgCertIDs (uint i, string memory orgName) public view returns(uint[] memory) {
         if(i == 1)
@@ -260,98 +213,59 @@ contract PASS{
             require(false, "The first argument must be 1 or 2!");
     }
 
-//===========================org=================================
-
-//-------------------Admin--------组织管理员的操作----1---------------------
-
-    function findOrgAdmin (string memory orgName, address admin) private view returns (uint) {
+    function findOrgUser (uint tag, string memory orgName, address userAdr) private view returns (uint) {
         uint i;
-        for(i = 0; i < orgs[orgIDs[orgName]].admins.length; i++)
-            if(admin == orgs[orgIDs[orgName]].admins[i])
-                return i;
+        if(tag == 1){
+            for(i = 0; i < orgs[orgIDs[orgName]].admins.length; i++)
+                if(userAdr == orgs[orgIDs[orgName]].admins[i])
+                    return i;
+        }else if(tag == 2){
+            for(i = 0; i < orgs[orgIDs[orgName]].members.length; i++)
+                if(userAdr == orgs[orgIDs[orgName]].members[i])
+                    return i;
+        }
         return i;
     }
 
-    // function judgeOrgAdmin(string memory orgName, address admin) private view returns(bool){
-    //     return orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, admin);
-    // }
-
-    // function addOrgAdmin (string memory orgName, address admin) private {
-    //     require(
-    //         orgs[orgIDs[orgName]].admins.length == findOrgAdmin(orgName, admin),
-    //         "This user is already admin!"
-    //     );
-    //     orgs[orgIDs[orgName]].admins.push(admin);
-    // }
 
     /** */
-    function deleteOrgAdmin (string memory orgName, address admin) public {
-        require(
-            msg.sender == orgs[orgIDs[orgName]].creator,
-            "Only the creator of the org can use this function!"
-        );
-        uint i = findOrgAdmin(orgName, admin);
-        require(
-            i != orgs[orgIDs[orgName]].admins.length,
-            "This user is not admin!"
-        );
-        delete orgs[orgIDs[orgName]].admins[i];
-    }
-
-    // modifier onlyAdmin(string memory orgName) {
-    //     require(
-    //         (orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
-    //         "Only the admin or creator of the org can use this function!"
-    //     );
-    //     _;
-    // }
-
-//==========================Admin=================================
-
-//-------------------Member-------组织成员的操作------1--------------------
-
-    function findOrgMember (string memory orgName, address member) private view returns (uint) {
+    function deleteOrgUser (uint tag, string memory orgName, address userAdr) public {
         uint i;
-        for(i = 0; i < orgs[orgIDs[orgName]].members.length; i++)
-            if(member == orgs[orgIDs[orgName]].members[i])
-                return i;
-        return i;
-    }
+        if(tag == 1){
+            // require(
+            //     msg.sender == orgs[orgIDs[orgName]].creator,
+            //     "Only the creator of the org can use this function!"
+            // );
+            i = findOrgUser(1, orgName, userAdr);
+            // require(
+            //     i != orgs[orgIDs[orgName]].admins.length,
+            //     "This user is not admin!"
+            // );
+            delete orgs[orgIDs[orgName]].admins[i];
 
-    // function judgeOrgMember(string memory orgName, address member) private view returns(bool){
-    //     return orgs[orgIDs[orgName]].members.length != findOrgAdmin(orgName, member);
-    // }
-
-    // function addOrgMember (string memory orgName, address member) private {
-    //     require(
-    //         orgs[orgIDs[orgName]].members.length == findOrgAdmin(orgName, member),
-    //         "This user is already member!"
-    //     );
-    //     orgs[orgIDs[orgName]].members.push(member);
-    // }
-
-    function deleteOrgMember (string memory orgName, address member) public {
-        require(
-            (orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
-            "Only the admin or creator of the org can use this function!"
-        );
-        uint i = findOrgAdmin(orgName, member);
-        require(
-            i != orgs[orgIDs[orgName]].members.length,
-            "This user is not member!"
-        );
-        delete orgs[orgIDs[orgName]].members[i];
+        }else if(tag == 2){
+            // require(
+            //     (orgs[orgIDs[orgName]].admins.length != findOrgUser(1, orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
+            //     "Only the admin or creator of the org can use this function!"
+            // );
+            i = findOrgUser(1, orgName, userAdr);
+            // require(
+            //     i != orgs[orgIDs[orgName]].members.length,
+            //     "This user is not member!"
+            // );
+            delete orgs[orgIDs[orgName]].members[i];
+        }
     }
 
     modifier onlyOrgMember(string memory orgName) {
         require(
-            (orgs[orgIDs[orgName]].members.length != findOrgAdmin(orgName, msg.sender)) || (orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
+            (orgs[orgIDs[orgName]].members.length != findOrgUser(2, orgName, msg.sender)) || (orgs[orgIDs[orgName]].admins.length != findOrgUser(1, orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
             "Only the member or admin or creator of the org can use this function!"
         );
         _;
     }
 
-//==========================Member=================================
+//===========================org=================================
 
 //-------------------Invite------组织邀请用户加入-----3-------------
 
@@ -370,19 +284,6 @@ contract PASS{
         //users[userIDs[msg.sender]].invs.push(Invitation(orgName, msg.sender, receiver, 3, site, body));
     }
 
-    // function acceptInv(uint invID) private{
-    //     if(invs[invID].site == 1){
-    //         users[userIDs[msg.sender]].adminOrgs.push(orgIDs[invs[invID].orgName]);
-    //         addOrgAdmin(invs[invID].orgName, msg.sender);
-    //     }else{
-    //         users[userIDs[msg.sender]].memberOrgs.push(orgIDs[invs[invID].orgName]);
-    //         addOrgMember(invs[invID].orgName, msg.sender);
-    //     }
-    // }
-
-    // function rejectInv(uint invID) private{
-    // }
-
     function userCheckInv(uint invID, uint8 status) public{
         if(status == 0){
             delete invs[invID];
@@ -390,7 +291,7 @@ contract PASS{
             if(status == 1){
                 if(invs[invID].site == 1){
                     require(
-                        orgs[orgIDs[invs[invID].orgName]].admins.length == findOrgAdmin(invs[invID].orgName, msg.sender),
+                        orgs[orgIDs[invs[invID].orgName]].admins.length == findOrgUser(1, invs[invID].orgName, msg.sender),
                         "This user is already admin!"
                     );
                     orgs[orgIDs[invs[invID].orgName]].admins.push(msg.sender);
@@ -398,7 +299,7 @@ contract PASS{
                     // addOrgAdmin(invs[invID].orgName, msg.sender);
                 }else{
                     require(
-                        orgs[orgIDs[invs[invID].orgName]].members.length == findOrgAdmin(invs[invID].orgName, msg.sender),
+                        orgs[orgIDs[invs[invID].orgName]].members.length == findOrgUser(2, invs[invID].orgName, msg.sender),
                         "This user is already member!"
                     );
                     users[userIDs[msg.sender]].memberOrgs.push(orgIDs[invs[invID].orgName]);
@@ -421,20 +322,34 @@ contract PASS{
 
 //---------------------颁发证书---------------2----------------
 
-    function orgIssuesCert(string memory certName, string memory certBody, address user, string memory orgName) public onlyOrgMember(orgName) {
-        uint certID = certs.length;
+    function orgIACert(uint tag, string memory certName, string memory certBody, address user, string memory orgName) public{
+        uint i;
+        for( i = 0; i < orgs[orgIDs[orgName]].certs.length ; i++)
+            if(strcmp(certName, orgs[orgIDs[orgName]].certs[i]))
+                break;
+        require(
+            i < orgs[orgIDs[orgName]].certs.length,
+            "This org don't have this cert!"
+        );
+
         Certification memory cert;
 
         cert.name = certName;
         cert.body = certBody;
-        cert.status = 2;
-        cert.owner = user;
         cert.origin = orgName;
-        cert.sender = msg.sender;
-        certs.push(cert);
+        if(tag == 1){               // 仅组织成员可以操作
+            cert.status = 2;
+            cert.owner = user;
+            cert.sender = msg.sender;
+        }else if(tag == 2){
+            cert.status = 5;
+            cert.owner = msg.sender;
+        }
 
-        orgs[orgIDs[orgName]].issueCertIDs.push(certID);
-        users[userIDs[user]].pendingCerts.push(certID);
+        orgs[orgIDs[orgName]].issueCertIDs.push(certs.length);
+        users[userIDs[user]].pendingCerts.push(certs.length);
+
+        certs.push(cert);
     }
 
     function handlePendingCert(uint choice, uint certID, uint waitID) public {
@@ -459,29 +374,6 @@ contract PASS{
 //============================颁发证书========================
 
 //------------------------ApplyCert--------2-------------------
-
-    function applyCertToOrg(string memory certName, string memory orgName, string memory body) public {
-        // uint i = getOrgCertID(orgName, certName);
-        uint i;
-        for( i = 0; i < orgs[orgIDs[orgName]].certs.length ; i++)
-            if(strcmp(certName, orgs[orgIDs[orgName]].certs[i]))
-                break;
-        require(
-            i < orgs[orgIDs[orgName]].certs.length,
-            "This org don't have this cert!"
-        );
-        Certification memory applyCert;
-
-        applyCert.name = certName;
-        applyCert.owner = msg.sender;
-        applyCert.origin = orgName;
-        applyCert.status = 5;
-        applyCert.body = body;
-
-        orgs[orgIDs[orgName]].applyCertIDs.push(certs.length);
-        users[userIDs[msg.sender]].applyCerts.push(certs.length);
-        certs.push(applyCert);
-    }
 
     function handleCertApply(bool res, uint certID) public onlyOrgMember(certs[certID].origin) {
         if(res){
@@ -514,11 +406,87 @@ contract PASS{
 
 
 
+    // function getCertOwner(uint i) private view returns(address) {
+    //     return certs[i].owner;
+    // }
 
+    // function getCertOrigin(uint i) private view returns(string memory) {
+    //     return certs[i].origin;
+    // }
 
+    // function getCertSender(uint i) private view returns(address) {
+    //     return certs[i].sender;
+    // }
 
+    // modifier onlyCreator(string memory orgName) {
+    //     require(
+    //         msg.sender == orgs[orgIDs[orgName]].creator,
+    //         "Only the creator of the org can use this function!"
+    //     );
+    //     _;
+    // }
 
+    // modifier existOrg(string memory orgName) {
+    //     require(
+    //         orgIDs[orgName] > 0 && orgIDs[orgName] < orgs.length,
+    //         "This org has not been created!"
+    //     );
+    //     _;
+    // }
 
+    // function getOrgExist(string memory orgName) private view returns(bool) {
+    //     return orgIDs[orgName] > 0 && orgIDs[orgName] < orgs.length;
+    // }
+
+    // function getOrgName(uint i) public view returns (string memory) {
+    //     assert(i < orgs.length);
+    //     return orgs[i].name;
+    // }
+
+    // function getOrgCertID (string memory orgName, string memory certName) private view existOrg(orgName) returns(uint) {
+    //     uint i;
+    //     for( i = 0; i < orgs[orgIDs[orgName]].certs.length ; i++)
+    //         if(strcmp(certName, orgs[orgIDs[orgName]].certs[i]))
+    //             return i;
+    //     return i;
+    // }
+
+    // function judgeOrgCertExist (string memory orgName, string memory certName) private view returns (bool) {
+    //     return getOrgCertID(orgName, certName) < orgs[orgIDs[orgName]].certs.length;
+    // }
+
+    // function judgeOrgAdmin(string memory orgName, address admin) private view returns(bool){
+    //     return orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, admin);
+    // }
+
+    // function addOrgAdmin (string memory orgName, address admin) private {
+    //     require(
+    //         orgs[orgIDs[orgName]].admins.length == findOrgAdmin(orgName, admin),
+    //         "This user is already admin!"
+    //     );
+    //     orgs[orgIDs[orgName]].admins.push(admin);
+    // }
+
+    // function acceptInv(uint invID) private{
+    //     if(invs[invID].site == 1){
+    //         users[userIDs[msg.sender]].adminOrgs.push(orgIDs[invs[invID].orgName]);
+    //         addOrgAdmin(invs[invID].orgName, msg.sender);
+    //     }else{
+    //         users[userIDs[msg.sender]].memberOrgs.push(orgIDs[invs[invID].orgName]);
+    //         addOrgMember(invs[invID].orgName, msg.sender);
+    //     }
+    // }
+
+    // function rejectInv(uint invID) private{
+    // }
+
+    // modifier onlyAdmin(string memory orgName) {
+    //     require(
+    //         (orgs[orgIDs[orgName]].admins.length != findOrgAdmin(orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
+    //         "Only the admin or creator of the org can use this function!"
+    //     );
+    //     _;
+    // }
 
     // function test() public view returns (string memory){
     //     return users[userIDs[msg.sender]].userinfo;
@@ -651,3 +619,39 @@ contract PASS{
     //     uint i = orgs[orgName].applyCertInfos[ApplyCertInfoID];
     //     applyCertInfos[i].status = 1;
     // }
+
+//-------------------Member-------组织成员的操作------1--------------------
+
+    // function findOrgMember (string memory orgName, address member) private view returns (uint) {
+    //     uint i;
+    //     for(i = 0; i < orgs[orgIDs[orgName]].members.length; i++)
+    //         if(member == orgs[orgIDs[orgName]].members[i])
+    //             return i;
+    //     return i;
+    // }
+
+    // function judgeOrgMember(string memory orgName, address member) private view returns(bool){
+    //     return orgs[orgIDs[orgName]].members.length != findOrgAdmin(orgName, member);
+    // }
+
+    // function addOrgMember (string memory orgName, address member) private {
+    //     require(
+    //         orgs[orgIDs[orgName]].members.length == findOrgAdmin(orgName, member),
+    //         "This user is already member!"
+    //     );
+    //     orgs[orgIDs[orgName]].members.push(member);
+    // }
+
+    // function deleteOrgMember (string memory orgName, address member) public {
+    //     require(
+    //         (orgs[orgIDs[orgName]].admins.length != findOrgUser(1, orgName, msg.sender)) || msg.sender == orgs[orgIDs[orgName]].creator,
+    //         "Only the admin or creator of the org can use this function!"
+    //     );
+    //     uint i = findOrgUser(1, orgName, member);
+    //     require(
+    //         i != orgs[orgIDs[orgName]].members.length,
+    //         "This user is not member!"
+    //     );
+    //     delete orgs[orgIDs[orgName]].members[i];
+    // }
+//==========================Member=================================

@@ -11,13 +11,18 @@ var vm = new Vue({
     data: {
         web3Provider: null,
         contracts: {},
-        show_login_or_join: true,
-        show_left_nav: false,
-        show_main: false,
-        show_nav:false,
-        loading: false,
+        accounts: [],
         userAdr: "",
-        nickName:'F'
+        user: {},
+        nickName: "",
+        realName: "",
+        IDcardNum: "",
+        personalWords: "",
+
+        orgs: {
+            amount: 0,
+            orgNames: []
+        }
     },
 
     delimiters: ['{[', ']}'],
@@ -33,15 +38,7 @@ var vm = new Vue({
     methods: {
         init: async function () {
             $('#userNickName').popover('disable');
-
-            web3.eth.getAccounts(function(error, accounts){
-                if(error) {
-                    console.log(error);
-                }
-                var account = accounts[0];
-                console.info(account);
-            });
-
+            
             return await this.initWeb3();
         },
 
@@ -55,6 +52,15 @@ var vm = new Vue({
 
         initContract: function() {
             var that = this;
+
+            web3.eth.getAccounts(function(error, accounts){
+                if(error) {
+                    console.log("----eor:" + error);
+                }
+                console.log(accounts);
+                that.accounts = accounts;
+            });
+
             $.getJSON('/static/PASS.json', function(data) {
                 // Get the necessary contract artifact file and instantiate it with truffle-contract.
                 var PASSArtifact = data;
@@ -88,16 +94,24 @@ var vm = new Vue({
                     console.log('---------------1');
                     PASSInstance = instance;  // 获取智能合约对象
             
-                    return PASSInstance.register( $userNickName.val().trim(), {gas: GAS});
+                    return PASSInstance.getSelfAdr();
+                }).then(function(res) {
+                    console.log(res);
+                    that.userAdr = res;
+                    that.user.nickName = $userNickName.val().trim();
+                    that.user.personalWords = $('#personalWords').val();
+                    that.user.realName = "未填写";
+                    that.user.IDcardNum = "未填写";
+                    return PASSInstance.register( JSON.stringify( that.user), {from: res, gas: GAS});
                 }).then(function(res) {
                     console.log(res+'---------注册成功------2');
-                    that.nickName = res;
-
-                    $('#joinModal').modal('hide');
-                    $('#divLoginOrJoin').addClass('f-hide');
-                    $('#nav').removeClass('f-hide');
-                    $('#left-nav-tab').removeClass('f-hide');
-                    $('#divMain').removeClass('f-hide');
+                    that.nickName = that.user.nickName;
+                    that.personalWords = that.user.personalWords;
+                    that.realName = that.user.realName;
+                    that.IDcardNum = that.user.IDcardNum;
+                    //$('#joinModal').modal('hide');
+                    alert("注册成功！");
+                    location.reload();
                 }).catch(function(err) {
                     console.log('-------注册失败--------3');
                     console.log(err.message);
@@ -120,22 +134,44 @@ var vm = new Vue({
 
             that.contracts.PASS.deployed().then(function(instance) {
                 console.log('---------------1');
+
                 PASSInstance = instance;  // 获取智能合约对象
         
                 return PASSInstance.getSelfAdr();
             }).then(function(res) {
                 console.log(res+'---------------2');
-                that.nickName = res;
+
+                that.userAdr = res;
+                return PASSInstance.getUserinfo(res);
                 
+            }).then(function(res){
+                if(!res)
+                    alert("请先注册！");
+                else{
+                    that.user = JSON.parse(res);
+                    that.nickName = that.user.nickName;
+                    that.personalWords = that.user.personalWords;
+                    if(that.user.realName){
+                        that.realName = that.user.realName;
+                        that.IDcardNum = that.user.IDcardNum;
+                    }else{
+                        that.realName = "未填写";
+                        that.IDcardNum = "未填写";
+                    }
+                    
+                    $('#divLoginOrJoin').remove();
+                    $('#nav').removeClass('f-hide');
+                    $('#left-nav-tab').removeClass('f-hide');
+                    $('#divMain').removeClass('f-hide');
+                }
             }).catch(function(err) {
                 console.log('---------------3');
                 console.log(err.message);
+                //alert("请先在钱包上登录！");
+                alert(err.message);
             });
 
-            $('#divLoginOrJoin').addClass('f-hide');
-            $('#nav').removeClass('f-hide');
-            $('#left-nav-tab').removeClass('f-hide');
-            $('#divMain').removeClass('f-hide');
+            
             
         },
 
