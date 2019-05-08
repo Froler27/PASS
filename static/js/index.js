@@ -12,17 +12,36 @@ var vm = new Vue({
         web3Provider: null,
         contracts: {},
         accounts: [],
-        userAdr: "",
+
         user: {},
+        userAdr: "",
         nickName: "",
         realName: "",
         IDcardNum: "",
         personalWords: "",
 
-        orgs: {
-            amount: 0,
-            orgNames: []
-        }
+        ownOrgs: [
+            {
+                name: "",
+                createdTime: Date.now(),
+                brief: "",
+                creator: "",
+                creatorName: "",
+                admins: [],
+                members: [],
+                certs: [],
+                issueCertIDs: [],
+                applyCertIDs: []
+            }
+        ],
+        adminOrgs: [],
+        memberOrgs: [],
+
+        ownCerts: [],
+        applyCerts: [],
+        pendingCerts: [],
+
+        invIDs: []
     },
 
     delimiters: ['{[', ']}'],
@@ -126,27 +145,29 @@ var vm = new Vue({
             }
         },
 
-        login: function () {
-            console.log("正在登录...");
+        login: async function () {
+            console.log("正在登录...    时间：" + new Date());
 
             var PASSInstance;
             var that = this;
 
-            that.contracts.PASS.deployed().then(function(instance) {
-                console.log('---------------1');
+            await vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + new Date() + " -->: get PASS instance success!");
 
                 PASSInstance = instance;  // 获取智能合约对象
         
                 return PASSInstance.getSelfAdr();
             }).then(function(res) {
-                console.log(res+'---------------2');
+                console.log("success: " + new Date() + " -->: get user address: " + res);
 
                 that.userAdr = res;
                 return PASSInstance.getUserinfo(res);
                 
             }).then(function(res){
-                if(!res)
+                if(!res){
+                    console.log("fail   : " + new Date() + " -->: 登录失败！");
                     alert("请先注册！");
+                }
                 else{
                     that.user = JSON.parse(res);
                     that.nickName = that.user.nickName;
@@ -171,10 +192,126 @@ var vm = new Vue({
                 alert(err.message);
             });
 
-            
-            
+            await PASSInstance.getUserUintArr(vm.userAdr, 4).then(function(res){
+                console.log("success: " + new Date() + " -->: get ownCerts success!");
+                vm.ownCerts = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get ownCerts fail!");
+                console.log(err.message);
+                vm.ownCerts = [];
+            });
+
+            await PASSInstance.getUserUintArr(vm.userAdr, 1).then(function(res){
+                console.log("success: " + new Date() + " -->: get ownOrgs success!");
+                vm.ownOrgs = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get ownOrgs fail!");
+                console.log(err.message);
+                vm.ownOrgs = [];
+            });
+
+            PASSInstance.getUserUintArr(vm.userAdr, 2).then(function(res){
+                console.log("success: " + new Date() + " -->: get adminOrgs success!");
+                vm.adminOrgs = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get adminOrgs fail!");
+                console.log(err.message);
+                vm.adminOrgs = [];
+            });
+
+            PASSInstance.getUserUintArr(vm.userAdr, 3).then(function(res){
+                console.log("success: " + new Date() + " -->: get memberOrgs success!");
+                vm.memberOrgs = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get memberOrgs fail!");
+                console.log(err.message);
+                vm.memberOrgs = [];
+            });
+
+            PASSInstance.getUserUintArr(vm.userAdr, 5).then(function(res){
+                console.log("success: " + new Date() + " -->: get applyCerts success!");
+                vm.applyCerts = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get applyCerts fail!");
+                console.log(err.message);
+                vm.applyCerts = [];
+            });
+
+            PASSInstance.getUserUintArr(vm.userAdr, 6).then(function(res){
+                console.log("success: " + new Date() + " -->: get pendingCerts success!");
+                vm.pendingCerts = res;
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get pendingCerts fail!");
+                console.log(err.message);
+                vm.pendingCerts = [];
+            });
         },
 
+        createOrg: function(){
+            var PASSInstance;
+            var that = this;
+            var $orgName = $('#orgName');
+            var orginfo = {};
+            
+            if(! $orgName.val().trim()){
+                $orgName.popover('enable').popover('show').focus();
+                setTimeout(function () {
+                    $orgName.popover('hide').popover('disable');
+                }, 2000);
+            }else{
+                that.contracts.PASS.deployed().then(function(instance) {
+                    console.log("success: " + new Date() + " -->: get PASS instance success!");
+
+                    PASSInstance = instance;  // 获取智能合约对象
+                    
+                    orginfo.name = $orgName.val().trim();
+                    orginfo.createdTime = Date.now();
+                    orginfo.creator = vm.userAdr;
+                    orginfo.creatorName = vm.nickName;
+                    orginfo.brief = $('#orgBrief').val();
+                    
+                    return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo));
+                }).then(function(res){
+                    console.log("success: " + new Date() + " -->: create org success!");
+                    vm.ownOrgs.push(res);
+                    
+                    alert("创建组织成功！");
+                    $('#createOrgModal').modal('hide');
+                }).catch(function(err) {
+                    console.log("fail: " + new Date() + " -->: create org fail!");
+                    console.log(err.message);
+
+                    alert("创建组织失败！\n错误信息：\n" + err.message);
+                });
+            }
+        },
+
+        getOrgInfo: async function (choice, orgID) {
+            // console.log("正在登录...    时间：" + new Date());
+
+            var PASSInstance;
+
+            vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + new Date() + " -->: getOrgInfo gets PASS instance success!");
+
+                PASSInstance = instance;  // 获取智能合约对象
+        
+                return PASSInstance.getOrginfo(0, orgID, "");
+            }).then(function(res) {
+                console.log("success: " + new Date() + " -->: get orginfo success!");
+
+                if(choice === 1)
+                    vm.ownOrgs.push(JSON.parse(res));
+                else if(choice === 2)
+                    vm.adminOrgs.push(JSON.parse(res));
+                else if(choice === 3)
+                    vm.memberOrgs.push(JSON.parse(res));
+                
+            }).catch(function(err) {
+                console.log("fail   : " + new Date() + " -->: get orginfo fail!");
+                console.log(err.message);
+            });
+        },
 
         create: function (todo) {
             var that = this;

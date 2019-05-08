@@ -92,7 +92,7 @@ contract PASS{
 
     function register(string memory userinfo) public {
         require(                        // 要求用户未注册过
-            !(userIDs[msg.sender] >= 0 && userIDs[msg.sender] < users.length),
+            !(userIDs[msg.sender] > 0 && userIDs[msg.sender] < users.length),
             "Don't register again!"
         );
         User memory user;
@@ -152,7 +152,7 @@ contract PASS{
 
 //----------------------org----------5--------------
 
-    function createOrg(string memory orgName, string memory orginfo) public onlyUsers {
+    function createOrg(string memory orgName, string memory orginfo) public onlyUsers returns(uint){
         require(                        // 要求组织名字唯一
             !(orgIDs[orgName] > 0 && orgIDs[orgName] < orgs.length),
             "The name has existed!"
@@ -168,6 +168,7 @@ contract PASS{
         orgs.push(org);
 
         users[userIDs[msg.sender]].ownOrgs.push(orgIDs[orgName]);
+        return orgs.length - 1;
     }
 
     // tag != 0 时返回组织可颁发证书信息
