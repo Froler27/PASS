@@ -10,8 +10,15 @@
         </div>
 
         <div class="tab-pane fade" id="left-nav-messages" role="tabpanel" aria-labelledby="left-nav-messages-tab">
-          {% include "my_orgs.html" %}
+            <div id="my_orgs" class="">
+                {% include "my_orgs.html" %}
+            </div>
+            <div id="my_org" class="f-hide">
+                {% include "my_org.html" %}
+            </div>
         </div>
+
+
     </div>
     
 <!--

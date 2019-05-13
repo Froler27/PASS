@@ -53,22 +53,28 @@
         
         <div class="tab-pane fade show active" id="org-owend" role="tabpanel" aria-labelledby="org-owend-tab">
             <div id="ownedOrgsAccordion">
-                <div class="card" v-for="org in ownedOrgs">
-                    <div class="card-header" id="headingOne">
+                <div class="card" v-for="org in ownOrgs">
+                    <div class="card-header" :id="org.header">
                     <h5 class="mb-0">
-                        <button class="btn btn-link" data-toggle="collapse" data-target="#ownedOrg1" aria-expanded="true" aria-controls="collapseOne">
-                        {[ org.orgName ]}
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
                         </button>
                     </h5>
                     </div>
-                
-                    <div id="ownedOrg1" class="collapse show" aria-labelledby="headingOne" data-parent="#ownedOrgsAccordion">
+                                   <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#ownedOrgsAccordion">
                     <div class="card-body">
-                        {[ org.brief ]}
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
+                        <p>
+                            <button v-on:click="showOrgPage" type="button" class="btn btn-outline-primary" :value="org.value">进入组织</button>
+                        </p>
                     </div>
                     </div>
                 </div>
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-header" id="headingTwo">
                     <h5 class="mb-0">
                         <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -81,30 +87,54 @@
                         Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
                     </div>
                     </div>
-                </div>
-                <div class="card">
-                    <div class="card-header" id="headingThree">
+                </div> -->
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="org-admin" role="tabpanel" aria-labelledby="org-admin-tab">
+            <div id="adminOrgsAccordion">
+                <div class="card" v-for="org in adminOrgs">
+                    <div class="card-header" :id="org.header">
                     <h5 class="mb-0">
-                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        Collapsible Group Item #3
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
                         </button>
                     </h5>
                     </div>
-                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#ownedOrgsAccordion">
+                                    <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#adminOrgsAccordion">
                     <div class="card-body">
-                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
                     </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="tab-pane fade" id="org-admin" role="tabpanel" aria-labelledby="org-admin-tab">
-            
-        </div>
-
         <div class="tab-pane fade" id="org-member-contact" role="tabpanel" aria-labelledby="org-member-tab">
-
+            <div id="memberOrgsAccordion">
+                <div class="card" v-for="org in memberOrgs">
+                    <div class="card-header" :id="org.header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
+                        </button>
+                    </h5>
+                    </div>
+                                    <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#memberOrgsAccordion">
+                    <div class="card-body">
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

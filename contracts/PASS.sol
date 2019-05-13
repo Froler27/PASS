@@ -164,9 +164,10 @@ contract PASS{
         org.orginfo = orginfo;
         org.name = orgName;
 
-        orgIDs[orgName] = orgs.length;
         orgs.push(org);
-
+        if(orgs.length == 1)
+            orgs.push(org);
+        orgIDs[orgName] = orgs.length - 1;
         users[userIDs[msg.sender]].ownOrgs.push(orgIDs[orgName]);
         return orgs.length - 1;
     }
@@ -200,8 +201,12 @@ contract PASS{
     //     return orgs[orgIDs[orgName]].certs[i];
     // }
 
-    function addOrgCertName (string memory orgName, string memory certName) public {
-        orgs[orgIDs[orgName]].certs.push(certName);
+    function opOrgCertName (uint i, string memory orgName, string memory certName, uint certNameID) public {
+        if(i == 1){
+            orgs[orgIDs[orgName]].certs.push(certName);
+        }else if(i == 2){
+            delete orgs[orgIDs[orgName]].certs[certNameID];
+        }
     }
 
 

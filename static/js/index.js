@@ -21,18 +21,18 @@ var vm = new Vue({
         personalWords: "",
 
         ownOrgs: [
-            {
-                name: "",
-                createdTime: Date.now(),
-                brief: "",
-                creator: "",
-                creatorName: "",
-                admins: [],
-                members: [],
-                certs: [],
-                issueCertIDs: [],
-                applyCertIDs: []
-            }
+            // {
+            //     name: "",
+            //     createdTime: Date.now(),
+            //     brief: "",
+            //     creator: "",
+            //     creatorName: "",
+            //     admins: [],
+            //     members: [],
+            //     certs: [],
+            //     issueCertIDs: [],
+            //     applyCertIDs: []
+            // }
         ],
         adminOrgs: [],
         memberOrgs: [],
@@ -203,7 +203,10 @@ var vm = new Vue({
 
             await PASSInstance.getUserUintArr(vm.userAdr, 1).then(function(res){
                 console.log("success: " + new Date() + " -->: get ownOrgs success!");
-                vm.ownOrgs = res;
+                
+                res.forEach(function (element){
+                    vm.getOrgInfo(1, element);
+                });
             }).catch(function(err) {
                 console.log("fail   : " + new Date() + " -->: get ownOrgs fail!");
                 console.log(err.message);
@@ -259,7 +262,7 @@ var vm = new Vue({
                     $orgName.popover('hide').popover('disable');
                 }, 2000);
             }else{
-                that.contracts.PASS.deployed().then(function(instance) {
+                vm.contracts.PASS.deployed().then(function(instance) {
                     console.log("success: " + new Date() + " -->: get PASS instance success!");
 
                     PASSInstance = instance;  // 获取智能合约对象
@@ -270,7 +273,7 @@ var vm = new Vue({
                     orginfo.creatorName = vm.nickName;
                     orginfo.brief = $('#orgBrief').val();
                     
-                    return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo));
+                    return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {gas: GAS});
                 }).then(function(res){
                     console.log("success: " + new Date() + " -->: create org success!");
                     vm.ownOrgs.push(res);
@@ -299,18 +302,74 @@ var vm = new Vue({
                 return PASSInstance.getOrginfo(0, orgID, "");
             }).then(function(res) {
                 console.log("success: " + new Date() + " -->: get orginfo success!");
-
-                if(choice === 1)
-                    vm.ownOrgs.push(JSON.parse(res));
-                else if(choice === 2)
-                    vm.adminOrgs.push(JSON.parse(res));
-                else if(choice === 3)
-                    vm.memberOrgs.push(JSON.parse(res));
+                console.log(res);
+                var org = JSON.parse(res);
+                var d = new Date(org.createdTime);
+                org.value = orgID;
+                org.createdDate = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+                if(choice === 1){
+                    org.header = "header_own_" + orgID;
+                    org.btnShow = "#collapse_own_" + orgID;
+                    org.collapse = "collapse_own_" + orgID;
+                    vm.ownOrgs.push(org);
+                }
+                else if(choice === 2){
+                    org.header = "header_admin_" + orgID;
+                    org.btnShow = "#collapse_admin_" + orgID;
+                    org.collapse = "collapse_admin_" + orgID;
+                    org.createdTime
+                    vm.adminOrgs.push(org);
+                }
+                else if(choice === 3){
+                    org.header = "header_member_" + orgID;
+                    org.btnShow = "#collapse_member_" + orgID;
+                    org.collapse = "collapse_member_" + orgID;
+                    vm.memberOrgs.push(org);
+                }
                 
             }).catch(function(err) {
                 console.log("fail   : " + new Date() + " -->: get orginfo fail!");
                 console.log(err.message);
             });
+        },
+
+        showOrgs: function(){
+            var $myOrgs = $('#my_orgs');
+            var $myOrg = $('#my_org');
+            if($myOrgs.hasClass('f-hide')){
+                $myOrgs.removeClass("f-hide");
+                $myOrg.addClass("f-hide");
+            }
+        },
+
+        showOrgPage: function(event) {
+            var PASSInstance;
+            $('#my_orgs').addClass("f-hide");
+            $('#my_org').removeClass("f-hide");
+            // vm.contracts.PASS.deployed().then(function(instance) {
+            //     console.log("success: " + new Date() + " -->: get PASS instance success!");
+
+            //     PASSInstance = instance;  // 获取智能合约对象
+                
+            //     orginfo.name = $orgName.val().trim();
+            //     orginfo.createdTime = Date.now();
+            //     orginfo.creator = vm.userAdr;
+            //     orginfo.creatorName = vm.nickName;
+            //     orginfo.brief = $('#orgBrief').val();
+                
+            //     return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {gas: GAS});
+            // }).then(function(res){
+            //     console.log("success: " + new Date() + " -->: create org success!");
+            //     vm.ownOrgs.push(res);
+                
+            //     alert("创建组织成功！");
+            //     $('#createOrgModal').modal('hide');
+            // }).catch(function(err) {
+            //     console.log("fail: " + new Date() + " -->: create org fail!");
+            //     console.log(err.message);
+
+            //     alert("创建组织失败！\n错误信息：\n" + err.message);
+            // });
         },
 
         create: function (todo) {
