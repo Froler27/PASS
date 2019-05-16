@@ -3,7 +3,7 @@
     创建组织
 </button>
   
-  <!-- Modal -->
+<!-- Modal -->
 <div class="modal fade" id="createOrgModal" tabindex="-1" role="dialog" aria-labelledby="createOrgModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -70,6 +70,7 @@
                         <p>简介：{[ org.brief ]}</p>
                         <p>
                             <button v-on:click="showOrgPage" type="button" class="btn btn-outline-primary" :value="org.value">进入组织</button>
+                            <button class="f-hide" >{[ org.name ]}</button>
                         </p>
                     </div>
                     </div>

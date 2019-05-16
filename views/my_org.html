@@ -1,1 +1,88 @@
-ssdfsfdsf
+<button type="button" class="btn btn-outline-primary">邀请成员</button>
+<button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#addCertNameModal">添加可颁发证书</button>
+<div style="height: 10px;"></div>
+<div id="orgPage"></div>
+<table class="table" v-if="showOrgDetail">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">证书名称</th>
+        <th scope="col">证书类型</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="cert in showCertName">
+        <th scope="row">{[ cert.i ]}</th>
+        <td>{[ cert.certName ]}</td>
+        <td>{[ cert.certType ]}</td>
+        <td><button v-on:click="changIssueCertName" type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#issueCertModal" :value="cert.certName">颁发</button></td>
+      </tr>
+    </tbody>
+</table>
+
+<div class="modal fade" id="addCertNameModal" tabindex="-1" role="dialog" aria-labelledby="addCertNameModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCertNameModalLongTitle">可颁发证书信息</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="certNameAdd" class="col-form-label">证书名称：</label>
+                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="证书名称必须填写！" type="text" class="form-control" id="certNameAdd" placeholder="请输入证书名称" required>
+                </div>
+                <div class="form-group">
+                    <label for="certTypeAdd" class="col-form-label">证书类型：</label>
+                    <input type="text" class="form-control" id="certTypeAdd" placeholder="请输入证书的类型"></input>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-success" v-on:click="issueCert">提交</button>
+        </div>
+
+      </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="issueCertModal" tabindex="-1" role="dialog" aria-labelledby="issueCertModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="issueCertModalLongTitle">颁发证书</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="certNameIssue" class="col-form-label">证书名称：</label>
+                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="证书名称必须填写！" type="text" class="form-control" id="certNameIssue" placeholder="请输入证书名称" readonly="readonly" :value="issueCertName">
+                </div>
+                <div class="form-group">
+                    <label for="certTypeAdd" class="col-form-label">证书类型：</label>
+                    <input type="text" class="form-control" id="certTypeAdd" placeholder="请输入证书的类型"></input>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-success" v-on:click="addCertName">提交</button>
+        </div>
+
+      </div>
+    </div>
+</div>

@@ -99,8 +99,10 @@ contract PASS{
 
         user.myself = msg.sender;
         user.userinfo = userinfo;
-        userIDs[msg.sender] = users.length;
         users.push(user);
+        if(users.length == 1)
+            users.push(user);
+        userIDs[msg.sender] = users.length - 1;
     }
 
     function getSelfAdr() public view returns(address){
@@ -179,6 +181,7 @@ contract PASS{
                 return orgs[orgIDs[orgName]].orginfo;
             return orgs[i].orginfo;
         }else{
+            require(i<orgs[orgIDs[orgName]].certs.length,"exceed limit!");
             return orgs[orgIDs[orgName]].certs[i];
         }
     }

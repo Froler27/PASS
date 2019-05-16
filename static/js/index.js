@@ -12,13 +12,19 @@ var vm = new Vue({
         web3Provider: null,
         contracts: {},
         accounts: [],
-
+        showOrgDetail: false,
+        i: 0,
         user: {},
         userAdr: "",
         nickName: "",
         realName: "",
         IDcardNum: "",
         personalWords: "",
+
+        issueCertName: "",
+
+        showOrg: [],
+        showCertName: [],
 
         ownOrgs: [
             // {
@@ -53,6 +59,8 @@ var vm = new Vue({
     created: function () {
         this.init();
     },
+
+    
 
     methods: {
         init: async function () {
@@ -273,10 +281,20 @@ var vm = new Vue({
                     orginfo.creatorName = vm.nickName;
                     orginfo.brief = $('#orgBrief').val();
                     
-                    return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {gas: GAS});
-                }).then(function(res){
+                    return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {from: vm.userAdr, gas: GAS});
+                }).then(function(orgID){
                     console.log("success: " + new Date() + " -->: create org success!");
-                    vm.ownOrgs.push(res);
+
+                    // var d = new Date(orginfo.createdTime);
+                    // orginfo.value = orgID;
+                    // orginfo.createdDate = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+                    // orginfo.header = "header_own_" + orgID;
+                    // orginfo.btnShow = "#collapse_own_" + orgID;
+                    // orginfo.collapse = "collapse_own_" + orgID;
+                    
+                    // vm.ownOrgs.push(orginfo);
+                    console.log(orgID);
+                    vm.getOrgInfo(1, orgID);
                     
                     alert("创建组织成功！");
                     $('#createOrgModal').modal('hide');
@@ -342,34 +360,131 @@ var vm = new Vue({
             }
         },
 
-        showOrgPage: function(event) {
+        showOrgPage: async function(event) {
+            vm.showOrgDetail = false;
             var PASSInstance;
             $('#my_orgs').addClass("f-hide");
             $('#my_org').removeClass("f-hide");
-            // vm.contracts.PASS.deployed().then(function(instance) {
-            //     console.log("success: " + new Date() + " -->: get PASS instance success!");
+            var orgID = event.target.value;
+            var orgName = $(event.target).next().text();
+            var i=0;
+            for (i=0; i<vm.ownOrgs.length; i++) {
+                if(vm.ownOrgs[i].name == orgName){
+                    break;
+                }
+            }
+            
+            await vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + new Date() + " -->: get PASS instance success!");
 
-            //     PASSInstance = instance;  // 获取智能合约对象
+                PASSInstance = instance;  // 获取智能合约对象
                 
-            //     orginfo.name = $orgName.val().trim();
-            //     orginfo.createdTime = Date.now();
-            //     orginfo.creator = vm.userAdr;
-            //     orginfo.creatorName = vm.nickName;
-            //     orginfo.brief = $('#orgBrief').val();
+                return PASSInstance.getOrgUserAdrs(1, orgName);
                 
-            //     return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {gas: GAS});
-            // }).then(function(res){
-            //     console.log("success: " + new Date() + " -->: create org success!");
-            //     vm.ownOrgs.push(res);
-                
-            //     alert("创建组织成功！");
-            //     $('#createOrgModal').modal('hide');
-            // }).catch(function(err) {
-            //     console.log("fail: " + new Date() + " -->: create org fail!");
-            //     console.log(err.message);
+            }).then(function(res){
+                console.log("success: " + new Date() + " -->: get org admins success!");
+                vm.ownOrgs[i].admins = res;
 
-            //     alert("创建组织失败！\n错误信息：\n" + err.message);
-            // });
+                return PASSInstance.getOrgUserAdrs(2, orgName);
+            }).then(function(res){
+                console.log("success: " + new Date() + " -->: get org members success!");
+                vm.ownOrgs[i].members = res;
+
+                return PASSInstance.getOrgCertIDs(1, orgName);
+            }).then(function(res){
+                console.log("success: " + new Date() + " -->: get org issued certs' ID success!");
+                vm.ownOrgs[i].issueCertIDs = res;
+
+                return PASSInstance.getOrgCertIDs(2, orgName);
+            }).then(function(res){
+                console.log("success: " + new Date() + " -->: get org apply certs' ID success!");
+                vm.ownOrgs[i].applyCertIDs = res;
+
+                $("#orgPage").html(function(){
+                    var htmlstr = '<h3>'+vm.ownOrgs[i].name +
+                        '</h3><p>组织创建者名称：' + vm.ownOrgs[i].creatorName + 
+                        '</p><p>组织创建者地址：' + vm.ownOrgs[i].creator + '</p>';
+                    htmlstr += `<p>组织简介：` + vm.ownOrgs[i].brief + `</p> `;
+                    return htmlstr;
+                });
+
+                vm.showOrg.push(JSON.parse(JSON.stringify(vm.ownOrgs[i])));
+                vm.showOrgDetail = true;
+            }).catch(function(err) {
+                console.log("fail: " + new Date() + " -->: get org detail fail!");
+                console.log(err.message);
+
+                alert("显示组织页面失败！\n错误信息：\n" + err.message);
+            });
+
+            var j;
+            var n = 8;
+            vm.i = 0;
+            for(j=0; j<n; j++){
+                await PASSInstance.getOrginfo(1, j, orgName).then(function(res){
+                    
+                    if(res.trim()){
+                        vm.i += 1;
+                        var obj = JSON.parse(res);
+                        obj.i = vm.i;
+                        vm.showCertName.push(obj);
+                    }
+                }).catch(function(err){
+                    if(err.message=="VM Exception while processing transaction: invalid opcode")
+                        j=n;
+                    else{
+                        console.log("fail: " + new Date() + " -->: get org cert fail!");
+                        console.log(err.message);
+                    }
+                });
+            }
+        },
+
+        addCertName: function(){
+            var PASSInstance;
+            var orgName = $('#orgPage>h3').text();
+            var $certAdd = $('#certNameAdd');
+            var certName = $certAdd.val().trim();
+            var certType = $('#certTypeAdd').val().trim();
+            var certAddObj = {};
+            certAddObj.certName = certName;
+            certAddObj.certType = certType;
+            vm.showOrgDetail = false;
+            if(certName == ''){
+                $certAdd.popover('enable').popover('show').focus();
+                setTimeout(function () {
+                    $certAdd.popover('hide').popover('disable');
+                }, 2000);
+            }else{
+                vm.contracts.PASS.deployed().then(function(instance) {
+                    console.log("success: " + new Date() + " -->: addCertName gets PASS instance success!");
+
+                    PASSInstance = instance;  // 获取智能合约对象
+            
+                    return PASSInstance.opOrgCertName(1, orgName, JSON.stringify(certAddObj), 0, { gas: GAS});
+                }).then(function(res) {
+                    console.log("success: " + new Date() + " -->: add cert success!");
+                    vm.i += 1;
+                    certAddObj.i = vm.i;
+                    vm.showCertName.push(certAddObj);
+                    alert("添加可颁发证书成功！");
+                    $('#addCertNameModal').modal('hide');
+                }).catch(function(err) {
+                    console.log("fail   : " + new Date() + " -->: add cert fail!");
+                    console.log(err.message);
+                });
+            }
+            vm.showOrgDetail = true;
+        },
+
+        changIssueCertName: function(e){
+            var $e = $(e.target);
+            console.log($e.attr('value'));
+            $('#certNameIssue').val($e.attr('value'));
+        },
+
+        issueCert: function(){
+            
         },
 
         create: function (todo) {
