@@ -26,6 +26,16 @@ var vm = new Vue({
         showOrg: [],
         showCertName: [],
 
+        statusSence: [
+            '不存在',
+            '已领取',
+            '待领取',
+            '已拒绝',
+            '已失效',
+            '申请中',
+            '已被拒绝'
+        ],
+
         ownOrgs: [
             // {
             //     name: "",
@@ -154,26 +164,26 @@ var vm = new Vue({
         },
 
         login: async function () {
-            console.log("正在登录...    时间：" + new Date());
+            console.log("正在登录...    时间：" + Date.now());
 
             var PASSInstance;
             var that = this;
 
             await vm.contracts.PASS.deployed().then(function(instance) {
-                console.log("success: " + new Date() + " -->: get PASS instance success!");
+                console.log("success: " + Date.now() + " -->: get PASS instance success!");
 
                 PASSInstance = instance;  // 获取智能合约对象
         
                 return PASSInstance.getSelfAdr();
             }).then(function(res) {
-                console.log("success: " + new Date() + " -->: get user address: " + res);
+                console.log("success: " + Date.now() + " -->: get user address: " + res);
 
                 that.userAdr = res;
                 return PASSInstance.getUserinfo(res);
                 
             }).then(function(res){
                 if(!res){
-                    console.log("fail   : " + new Date() + " -->: 登录失败！");
+                    console.log("fail   : " + Date.now() + " -->: 登录失败！");
                     alert("请先注册！");
                 }
                 else{
@@ -201,60 +211,66 @@ var vm = new Vue({
             });
 
             await PASSInstance.getUserUintArr(vm.userAdr, 4).then(function(res){
-                console.log("success: " + new Date() + " -->: get ownCerts success!");
-                vm.ownCerts = res;
+                console.log("success: " + Date.now() + " -->: get ownCerts success!");
+                var i=0;
+                for(i=0; i<res.length; i++){
+                    vm.getCertsDetail(1, res[i].c[0], i);
+                }
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get ownCerts fail!");
+                console.log("fail   : " + Date.now() + " -->: get ownCerts fail!");
                 console.log(err.message);
-                vm.ownCerts = [];
             });
 
             await PASSInstance.getUserUintArr(vm.userAdr, 1).then(function(res){
-                console.log("success: " + new Date() + " -->: get ownOrgs success!");
+                console.log("success: " + Date.now() + " -->: get ownOrgs success!");
                 
                 res.forEach(function (element){
                     vm.getOrgInfo(1, element);
                 });
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get ownOrgs fail!");
+                console.log("fail   : " + Date.now() + " -->: get ownOrgs fail!");
                 console.log(err.message);
                 vm.ownOrgs = [];
             });
 
             PASSInstance.getUserUintArr(vm.userAdr, 2).then(function(res){
-                console.log("success: " + new Date() + " -->: get adminOrgs success!");
+                console.log("success: " + Date.now() + " -->: get adminOrgs success!");
                 vm.adminOrgs = res;
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get adminOrgs fail!");
+                console.log("fail   : " + Date.now() + " -->: get adminOrgs fail!");
                 console.log(err.message);
                 vm.adminOrgs = [];
             });
 
             PASSInstance.getUserUintArr(vm.userAdr, 3).then(function(res){
-                console.log("success: " + new Date() + " -->: get memberOrgs success!");
+                console.log("success: " + Date.now() + " -->: get memberOrgs success!");
                 vm.memberOrgs = res;
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get memberOrgs fail!");
+                console.log("fail   : " + Date.now() + " -->: get memberOrgs fail!");
                 console.log(err.message);
                 vm.memberOrgs = [];
             });
 
             PASSInstance.getUserUintArr(vm.userAdr, 5).then(function(res){
-                console.log("success: " + new Date() + " -->: get applyCerts success!");
-                vm.applyCerts = res;
+                console.log("success: " + Date.now() + " -->: get applyCerts success!");
+                var i=0;
+                for(i=0; i<res.length; i++){
+                    vm.getCertsDetail(2, res[i].c[0], i);
+                }
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get applyCerts fail!");
+                console.log("fail   : " + Date.now() + " -->: get applyCerts fail!");
                 console.log(err.message);
-                vm.applyCerts = [];
             });
 
             PASSInstance.getUserUintArr(vm.userAdr, 6).then(function(res){
-                console.log("success: " + new Date() + " -->: get pendingCerts success!");
-                vm.pendingCerts = res;
+                console.log("success: " + Date.now() + " -->: get pendingCerts success!");
+                var i=0;
+                for(i=0; i<res.length; i++){
+                    vm.getCertsDetail(3, res[i].c[0], i);
+                }
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get pendingCerts fail!");
+                console.log("fail   : " + Date.now() + " -->: get pendingCerts fail!");
                 console.log(err.message);
-                vm.pendingCerts = [];
             });
         },
 
@@ -271,7 +287,7 @@ var vm = new Vue({
                 }, 2000);
             }else{
                 vm.contracts.PASS.deployed().then(function(instance) {
-                    console.log("success: " + new Date() + " -->: get PASS instance success!");
+                    console.log("success: " + Date.now() + " -->: get PASS instance success!");
 
                     PASSInstance = instance;  // 获取智能合约对象
                     
@@ -283,7 +299,7 @@ var vm = new Vue({
                     
                     return PASSInstance.createOrg(orginfo.name, JSON.stringify(orginfo), {from: vm.userAdr, gas: GAS});
                 }).then(function(orgID){
-                    console.log("success: " + new Date() + " -->: create org success!");
+                    console.log("success: " + Date.now() + " -->: create org success!");
 
                     // var d = new Date(orginfo.createdTime);
                     // orginfo.value = orgID;
@@ -299,7 +315,7 @@ var vm = new Vue({
                     alert("创建组织成功！");
                     $('#createOrgModal').modal('hide');
                 }).catch(function(err) {
-                    console.log("fail: " + new Date() + " -->: create org fail!");
+                    console.log("fail: " + Date.now() + " -->: create org fail!");
                     console.log(err.message);
 
                     alert("创建组织失败！\n错误信息：\n" + err.message);
@@ -308,18 +324,18 @@ var vm = new Vue({
         },
 
         getOrgInfo: async function (choice, orgID) {
-            // console.log("正在登录...    时间：" + new Date());
+            // console.log("正在登录...    时间：" + Date.now());
 
             var PASSInstance;
 
             vm.contracts.PASS.deployed().then(function(instance) {
-                console.log("success: " + new Date() + " -->: getOrgInfo gets PASS instance success!");
+                console.log("success: " + Date.now() + " -->: getOrgInfo gets PASS instance success!");
 
                 PASSInstance = instance;  // 获取智能合约对象
         
                 return PASSInstance.getOrginfo(0, orgID, "");
             }).then(function(res) {
-                console.log("success: " + new Date() + " -->: get orginfo success!");
+                console.log("success: " + Date.now() + " -->: get orginfo success!");
                 console.log(res);
                 var org = JSON.parse(res);
                 var d = new Date(org.createdTime);
@@ -346,7 +362,7 @@ var vm = new Vue({
                 }
                 
             }).catch(function(err) {
-                console.log("fail   : " + new Date() + " -->: get orginfo fail!");
+                console.log("fail   : " + Date.now() + " -->: get orginfo fail!");
                 console.log(err.message);
             });
         },
@@ -375,29 +391,29 @@ var vm = new Vue({
             }
             
             await vm.contracts.PASS.deployed().then(function(instance) {
-                console.log("success: " + new Date() + " -->: get PASS instance success!");
+                console.log("success: " + Date.now() + " -->: get PASS instance success!");
 
                 PASSInstance = instance;  
                 
                 return PASSInstance.getOrgUserAdrs(1, orgName);
                 
             }).then(function(res){
-                console.log("success: " + new Date() + " -->: get org admins success!");
+                console.log("success: " + Date.now() + " -->: get org admins success!");
                 vm.ownOrgs[i].admins = res;
 
                 return PASSInstance.getOrgUserAdrs(2, orgName);
             }).then(function(res){
-                console.log("success: " + new Date() + " -->: get org members success!");
+                console.log("success: " + Date.now() + " -->: get org members success!");
                 vm.ownOrgs[i].members = res;
 
                 return PASSInstance.getOrgCertIDs(1, orgName);
             }).then(function(res){
-                console.log("success: " + new Date() + " -->: get org issued certs' ID success!");
+                console.log("success: " + Date.now() + " -->: get org issued certs' ID success!");
                 vm.ownOrgs[i].issueCertIDs = res;
 
                 return PASSInstance.getOrgCertIDs(2, orgName);
             }).then(function(res){
-                console.log("success: " + new Date() + " -->: get org apply certs' ID success!");
+                console.log("success: " + Date.now() + " -->: get org apply certs' ID success!");
                 vm.ownOrgs[i].applyCertIDs = res;
 
                 $("#orgPage").html(function(){
@@ -411,7 +427,7 @@ var vm = new Vue({
                 vm.showOrg.push(JSON.parse(JSON.stringify(vm.ownOrgs[i])));
                 vm.showOrgDetail = true;
             }).catch(function(err) {
-                console.log("fail: " + new Date() + " -->: get org detail fail!");
+                console.log("fail: " + Date.now() + " -->: get org detail fail!");
                 console.log(err.message);
 
                 alert("显示组织页面失败！\n错误信息：\n" + err.message);
@@ -434,7 +450,7 @@ var vm = new Vue({
                     if(err.message=="VM Exception while processing transaction: invalid opcode")
                         j=n;
                     else{
-                        console.log("fail: " + new Date() + " -->: get org cert fail!");
+                        console.log("fail: " + Date.now() + " -->: get org cert fail!");
                         console.log(err.message);
                     }
                 });
@@ -466,20 +482,20 @@ var vm = new Vue({
                 }, 2000);
             }else{
                 vm.contracts.PASS.deployed().then(function(instance) {
-                    console.log("success: " + new Date() + " -->: addCertName gets PASS instance success!");
+                    console.log("success: " + Date.now() + " -->: addCertName gets PASS instance success!");
 
                     PASSInstance = instance;  // 获取智能合约对象
             
                     return PASSInstance.opOrgCertName(1, orgName, JSON.stringify(certAddObj), 0, { gas: GAS});
                 }).then(function(res) {
-                    console.log("success: " + new Date() + " -->: add cert success!");
+                    console.log("success: " + Date.now() + " -->: add cert success!");
                     vm.i += 1;
                     certAddObj.i = vm.i;
                     vm.showCertName.push(certAddObj);
                     alert("添加可颁发证书成功！");
                     $('#addCertNameModal').modal('hide');
                 }).catch(function(err) {
-                    console.log("fail   : " + new Date() + " -->: add cert fail!");
+                    console.log("fail   : " + Date.now() + " -->: add cert fail!");
                     console.log(err.message);
                 });
             }
@@ -538,18 +554,18 @@ var vm = new Vue({
                 }, 2000);
             }else{
                 vm.contracts.PASS.deployed().then(function(instance) {
-                    console.log("success: " + new Date() + " -->: issueCert gets PASS instance success!");
+                    console.log("success: " + Date.now() + " -->: issueCert gets PASS instance success!");
 
                     PASSInstance = instance;  // 获取智能合约对象
             
                     return PASSInstance.orgIACert(1, JSON.stringify(certObj), JSON.stringify(certIssueObj), certGainer, vm.issueCertOrg, { gas: GAS});
                 }).then(function(res) {
-                    console.log("success: " + new Date() + " -->: issue cert success!");
+                    console.log("success: " + Date.now() + " -->: issue cert success!");
                     
                     alert("证书颁发成功，等待用户接受！");
                     $('#issueCertModal').modal('hide');
                 }).catch(function(err) {
-                    console.log("fail   : " + new Date() + " -->: issue cert fail!");
+                    console.log("fail   : " + Date.now() + " -->: issue cert fail!");
                     console.log(err.message);
                     alert("证书颁发失败！\n错误信息如下：\n"+  err.message);
                 });
@@ -557,8 +573,52 @@ var vm = new Vue({
             
         },
 
-        getPendingCerts: function(){
+        getCertsDetail: function(choice, certID, num){
+            var PASSInstance;
+            var certObj;
             
+            vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + Date.now() + " -->: get PASS instance success!");
+
+                PASSInstance = instance;  
+                
+                return PASSInstance.getCertBody(certID);
+            }).then(function(res){
+                console.log("success: " + Date.now() + " -->: get cert detail success!");
+                certObj = JSON.parse(res);
+                certObj.num = num;
+
+                return PASSInstance.getCertStatus(certID);
+            }).then(function(res){
+                console.log("success: " + Date.now() + " -->: get cert status success!");
+                
+                certObj.status = vm.statusSence[res];
+                if(choice == 1){
+                    vm.ownCerts.push(certObj);
+                }else if(choice == 2){
+                    vm.applyCerts.push(certObj);
+                }else{
+                    vm.pendingCerts.push(certObj);
+                }
+            }).catch(function(err) {
+                console.log("fail: " + Date.now() + " -->: get cert detail fail!");
+                console.log(err.message);
+            });
+        },
+
+        seePendingCert: function(e){
+            var $e = $(e.target);
+            var num = parseInt( $e.parent().prev().prev().prev().prev().prev().text()) - 1;
+            var d = new Date(vm.pendingCerts[num].issueTime);
+            var issueTime = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+            $('#cartModal-org').text("颁发组织：" + vm.pendingCerts[num].origin);
+            $('#cartModal-issueTime').text(issueTime + " 颁发")
+            $('#cartModal-name').text(vm.pendingCerts[num].certName);
+            $('#cartModal-type').text(vm.pendingCerts[num].certType);
+            $('#cartModal-status').text(vm.pendingCerts[num].status);
+            $('#cartModal-orgUserName').text(vm.pendingCerts[num].certType);
+            $('#cartModal-orgUserAdr').text(vm.pendingCerts[num].sender);
+            $('#cartModal-certContent').text(vm.pendingCerts[num].certContent);
         },
 
         create: function (todo) {

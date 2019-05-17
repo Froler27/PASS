@@ -100,6 +100,59 @@
               </tbody>
             </table>
         </div>
-        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">爽肤水的范德萨</div>
+
+        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+          <button type="button" class="btn btn-success" v-on:click="getCertsDetail(3, 0, 8)">提交</button>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">证书名称</th>
+                <th scope="col">证书类型</th>
+                <th scope="col">证书来源</th>
+                <th scope="col">证书状态</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="cert in pendingCerts">
+                <th scope="row">{[ cert.num + 1 ]}</th>
+                <td>{[ cert.certName ]}</td>
+                <td>{[ cert.certType ]}</td>
+                <td>{[ cert.origin ]}</td>
+                <td>{[ cert.status ]}</td>
+                <td><button v-on:click="seePendingCert" type="button" class="btn btn-primary" data-toggle="modal" data-target="#certModalCenter">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="certModalCenter" tabindex="-1" role="dialog" aria-labelledby="certModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+          <div class="card text-center">
+            <div class="card-header" id="cartModal-org"></div>
+            <div class="card-body cert-body">
+              <h5 class="card-title" id="cartModal-name"></h5>
+              
+              <div class="row" style="text-align:left;"><div class="col-2"></div><div class="col-10"><div class="row">
+                <div class="col-3">证书类型：</div><div class="col-9" id="cartModal-type"></div>
+                <div class="col-3">证书状态：</div><div class="col-9" id="cartModal-status"></div>
+                <div class="col-12" style="height: 10px;"></div>
+                <div class="col-3">颁发者名称：</div><div class="col-9" id="cartModal-orgUserName"></div>
+                <div class="col-3">颁发者地址：</div><div class="col-9" id="cartModal-orgUserAdr"></div>
+                <div class="col-12" style="height: 10px;"></div>
+                <div class="col-3"><h6>证书内容：</h6></div><div class="col-9" id="cartModal-certContent"></div>
+              </div></div></div>
+
+              <p class="card-text">
+                  <p ></p>
+              </p>
+            </div>
+            <div class="card-footer text-muted" id="cartModal-issueTime"></div>
+          </div>
+      </div>
     </div>
 </div>
