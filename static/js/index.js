@@ -21,7 +21,7 @@ var vm = new Vue({
         IDcardNum: "",
         personalWords: "",
 
-        issueCertName: "",
+        issueCertOrg: "",
 
         showOrg: [],
         showCertName: [],
@@ -377,7 +377,7 @@ var vm = new Vue({
             await vm.contracts.PASS.deployed().then(function(instance) {
                 console.log("success: " + new Date() + " -->: get PASS instance success!");
 
-                PASSInstance = instance;  // 获取智能合约对象
+                PASSInstance = instance;  
                 
                 return PASSInstance.getOrgUserAdrs(1, orgName);
                 
@@ -407,7 +407,7 @@ var vm = new Vue({
                     htmlstr += `<p>组织简介：` + vm.ownOrgs[i].brief + `</p> `;
                     return htmlstr;
                 });
-
+                vm.issueCertOrg = vm.ownOrgs[i].name;
                 vm.showOrg.push(JSON.parse(JSON.stringify(vm.ownOrgs[i])));
                 vm.showOrgDetail = true;
             }).catch(function(err) {
@@ -420,6 +420,7 @@ var vm = new Vue({
             var j;
             var n = 8;
             vm.i = 0;
+            vm.showCertName = [];
             for(j=0; j<n; j++){
                 await PASSInstance.getOrginfo(1, j, orgName).then(function(res){
                     
@@ -450,6 +451,14 @@ var vm = new Vue({
             certAddObj.certName = certName;
             certAddObj.certType = certType;
             vm.showOrgDetail = false;
+            console.log(certAddObj);
+
+            for (const cert of vm.showCertName) {
+                if(certName == cert.certName){
+                    certName = '';
+                    break;
+                }
+            }
             if(certName == ''){
                 $certAdd.popover('enable').popover('show').focus();
                 setTimeout(function () {
@@ -481,9 +490,74 @@ var vm = new Vue({
             var $e = $(e.target);
             console.log($e.attr('value'));
             $('#certNameIssue').val($e.attr('value'));
+
+            var certType = $e.parent().prev().text();
+            $('#certTypeIssue').val(certType);
+            console.log(certType);
         },
 
         issueCert: function(){
+            
+            var PASSInstance;
+
+            var certName = $('#certNameIssue').val();
+            var certType =  $('#certTypeIssue').val();
+            var $certGainer = $('#certGainer');
+            var certGainer = $certGainer.val().trim();
+            var certContent = $('#certContentIssue').val();
+            var certIssueObj = {};
+
+            certIssueObj.certName = certName;
+            certIssueObj.certType = certType;
+            certIssueObj.origin = vm.issueCertOrg;
+            certIssueObj.issueTime = Date.now();
+            certIssueObj.owner = certGainer;
+            certIssueObj.sender = vm.userAdr;
+            certIssueObj.certContent = certContent;
+
+            var certObj = {};
+            certObj.certName = certName;
+            certObj.certType = certType;
+
+            console.log(certIssueObj);
+
+            var tag = false;
+            for (const account of vm.accounts) {
+                if(account == certGainer){
+                    tag = true;
+                    break;
+                }
+            }
+            
+            
+
+            if(certGainer == '' || !tag){
+                $certGainer.popover('enable').popover('show').focus();
+                setTimeout(function () {
+                    $certGainer.popover('hide').popover('disable');
+                }, 2000);
+            }else{
+                vm.contracts.PASS.deployed().then(function(instance) {
+                    console.log("success: " + new Date() + " -->: issueCert gets PASS instance success!");
+
+                    PASSInstance = instance;  // 获取智能合约对象
+            
+                    return PASSInstance.orgIACert(1, JSON.stringify(certObj), JSON.stringify(certIssueObj), certGainer, vm.issueCertOrg, { gas: GAS});
+                }).then(function(res) {
+                    console.log("success: " + new Date() + " -->: issue cert success!");
+                    
+                    alert("证书颁发成功，等待用户接受！");
+                    $('#issueCertModal').modal('hide');
+                }).catch(function(err) {
+                    console.log("fail   : " + new Date() + " -->: issue cert fail!");
+                    console.log(err.message);
+                    alert("证书颁发失败！\n错误信息如下：\n"+  err.message);
+                });
+            }
+            
+        },
+
+        getPendingCerts: function(){
             
         },
 

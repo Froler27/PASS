@@ -346,7 +346,7 @@ contract PASS{
         cert.name = certName;
         cert.body = certBody;
         cert.origin = orgName;
-        if(tag == 1){               // 仅组织成员可以操作
+        if(tag == 1){               
             cert.status = 2;
             cert.owner = user;
             cert.sender = msg.sender;
