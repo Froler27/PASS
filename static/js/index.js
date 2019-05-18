@@ -36,6 +36,10 @@ var vm = new Vue({
             '已被拒绝'
         ],
 
+        certNum: [
+            0, 0, 0
+        ],
+
         ownOrgs: [
             // {
             //     name: "",
@@ -171,8 +175,7 @@ var vm = new Vue({
 
             await vm.contracts.PASS.deployed().then(function(instance) {
                 console.log("success: " + Date.now() + " -->: get PASS instance success!");
-
-                PASSInstance = instance;  // 获取智能合约对象
+                PASSInstance = instance; 
         
                 return PASSInstance.getSelfAdr();
             }).then(function(res) {
@@ -519,7 +522,7 @@ var vm = new Vue({
             var certName = $('#certNameIssue').val();
             var certType =  $('#certTypeIssue').val();
             var $certGainer = $('#certGainer');
-            var certGainer = $certGainer.val().trim();
+            var certGainer = $certGainer.val().trim().toLowerCase();
             var certContent = $('#certContentIssue').val();
             var certIssueObj = {};
 
@@ -535,7 +538,10 @@ var vm = new Vue({
             certObj.certName = certName;
             certObj.certType = certType;
 
-            console.log(certIssueObj);
+            if(certIssueObj.owner == certIssueObj.sender){
+                alert("不能为自己颁发证书！")
+                return;
+            }
 
             var tag = false;
             for (const account of vm.accounts) {
@@ -545,8 +551,6 @@ var vm = new Vue({
                 }
             }
             
-            
-
             if(certGainer == '' || !tag){
                 $certGainer.popover('enable').popover('show').focus();
                 setTimeout(function () {
@@ -556,7 +560,7 @@ var vm = new Vue({
                 vm.contracts.PASS.deployed().then(function(instance) {
                     console.log("success: " + Date.now() + " -->: issueCert gets PASS instance success!");
 
-                    PASSInstance = instance;  // 获取智能合约对象
+                    PASSInstance = instance;  
             
                     return PASSInstance.orgIACert(1, JSON.stringify(certObj), JSON.stringify(certIssueObj), certGainer, vm.issueCertOrg, { gas: GAS});
                 }).then(function(res) {
@@ -579,7 +583,6 @@ var vm = new Vue({
             
             vm.contracts.PASS.deployed().then(function(instance) {
                 console.log("success: " + Date.now() + " -->: get PASS instance success!");
-
                 PASSInstance = instance;  
                 
                 return PASSInstance.getCertBody(certID);
@@ -587,6 +590,13 @@ var vm = new Vue({
                 console.log("success: " + Date.now() + " -->: get cert detail success!");
                 certObj = JSON.parse(res);
                 certObj.num = num;
+                certObj.certID = certID;
+
+                return PASSInstance.getUserinfo(certObj.sender);
+            }).then(function(res){
+                console.log("success: " + Date.now() + " -->: get cert sender info success!");
+                var certSender = JSON.parse(res);
+                certObj.senderName = certSender.nickName;
 
                 return PASSInstance.getCertStatus(certID);
             }).then(function(res){
@@ -598,7 +608,11 @@ var vm = new Vue({
                 }else if(choice == 2){
                     vm.applyCerts.push(certObj);
                 }else{
-                    vm.pendingCerts.push(certObj);
+                    if(res == 2){
+                        certObj.num = vm.certNum[2];
+                        vm.certNum[2] += 1;
+                        vm.pendingCerts.push(certObj);
+                    }
                 }
             }).catch(function(err) {
                 console.log("fail: " + Date.now() + " -->: get cert detail fail!");
@@ -606,67 +620,97 @@ var vm = new Vue({
             });
         },
 
-        seePendingCert: function(e){
+        showCertBtn: function(choice){
+            var $ARbtn = $('#ARbtn');
+            if(choice == 3){
+                if($ARbtn.hasClass('f-hide'))
+                    $ARbtn.removeClass('f-hide');
+            }else{
+                if(!$ARbtn.hasClass('f-hide'))
+                    $ARbtn.addClass('f-hide');
+            }
+        },
+
+        seeCert: function(e){
             var $e = $(e.target);
             var num = parseInt( $e.parent().prev().prev().prev().prev().prev().text()) - 1;
-            var d = new Date(vm.pendingCerts[num].issueTime);
-            var issueTime = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
-            $('#cartModal-org').text("颁发组织：" + vm.pendingCerts[num].origin);
-            $('#cartModal-issueTime').text(issueTime + " 颁发")
-            $('#cartModal-name').text(vm.pendingCerts[num].certName);
-            $('#cartModal-type').text(vm.pendingCerts[num].certType);
-            $('#cartModal-status').text(vm.pendingCerts[num].status);
-            $('#cartModal-orgUserName').text(vm.pendingCerts[num].certType);
-            $('#cartModal-orgUserAdr').text(vm.pendingCerts[num].sender);
-            $('#cartModal-certContent').text(vm.pendingCerts[num].certContent);
-        },
-
-        create: function (todo) {
-            var that = this;
-            that.$resource('/api/todos').save(todo).then(function (resp) {
-                resp.json().then(function (result) {
-                    that.todos.push(result);
-                });
-            }, showError);
-        },
-
-        update: function (todo, prop, e) {
-            var that = this;
-            var t = {
-                name: todo.name,
-                description: todo.description
-            };
-            t[prop] = e.target.innerText;
-            if (t[prop] === todo[prop]) {
-                return;
+            var cert;
+            if($e.attr('value')  == 1){
+                cert = vm.ownCerts[num];
+            }else if($e.attr('value')  == 2){
+                cert = vm.applyCerts[num];
+            }else{
+                cert = vm.pendingCerts[num];
             }
-            that.$resource('/api/todos/' + todo.id).update(t).then(function (resp) {
-                resp.json().then(function (r) {
-                    todo.name = r.name;
-                    todo.description = r.description;
-                });
-            }, function (resp) {
-                e.target.innerText = todo[prop];
-                showError(resp);
+            var d = new Date(cert.issueTime);
+            var issueTime = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
+            
+            vm.showCertBtn($e.attr('value'));
+            $('#wiatID').val(num);
+            $('#cartModal-org').text("颁发组织：" + cert.origin);
+            $('#cartModal-issueTime').text(issueTime + " 颁发");
+            $('#cartModal-name').text(cert.certName);
+            $('#cartModal-type').text(cert.certType);
+            $('#cartModal-status').text(cert.status);
+            $('#cartModal-orgUserName').text(cert.senderName);
+            $('#cartModal-orgUserAdr').text(cert.sender);
+            $('#cartModal-certContent').text(cert.certContent);
+        },
+
+        acceptCert: function(){
+            var PASSInstance;
+            var waitID = $('#wiatID').val();
+            var certID = vm.pendingCerts[waitID].certID;
+
+            vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + Date.now() + " -->: acceptCert gets PASS instance success!");
+                PASSInstance = instance;
+
+                return PASSInstance.handlePendingCert(1, certID, waitID, { gas: GAS});
+            }).then(function(res) {
+                console.log("success: " + Date.now() + " -->: accept cert success!");
+                alert("领取证书成功！");
+
+                vm.pendingCerts[waitID].status = vm.statusSence[1];
+                vm.pendingCerts[waitID].num = vm.ownCerts.length;
+                vm.ownCerts.push(vm.pendingCerts[waitID]);
+                vm.pendingCerts.splice(waitID, 1);
+                for(let ii = waitID; ii < vm.pendingCerts.length; ii++){
+                    vm.pendingCerts[ii].num -= 1;
+                }
+                $('#certModalCenter').modal('hide');
+            }).catch(function(err) {
+                console.log("fail   : " + Date.now() + " -->: add cert fail!");
+                console.log(err.message);
+                alert("领取证书失败！\n失败原因：\n" + err.message);
             });
         },
 
-        remove: function (todo) {
-            var that = this;
-            that.$resource('/api/todos/' + todo.id).delete().then(function (resp) {
-                var i, index = -1;
-                for (i=0; i<that.todos.length; i++) {
-                    if (that.todos[i].id === todo.id) {
-                        index = i;
-                        break;
-                    }
-                }
-                if (index >= 0) {
-                    that.todos.splice(index, 1);
-                }
-            }, showError);
-        }
+        rejectCert: function(){
+            var PASSInstance;
+            var waitID = $('#wiatID').val();
+            var certID = vm.pendingCerts[waitID].certID;
 
+            vm.contracts.PASS.deployed().then(function(instance) {
+                console.log("success: " + Date.now() + " -->: acceptCert gets PASS instance success!");
+                PASSInstance = instance;
+
+                return PASSInstance.handlePendingCert(3, certID, waitID, { gas: GAS});
+            }).then(function(res) {
+                console.log("success: " + Date.now() + " -->: reject cert success!");
+                alert("您已拒绝领取证书！");
+                
+                vm.pendingCerts.splice(waitID, 1);
+                for(let ii = waitID; ii < vm.pendingCerts.length; ii++){
+                    vm.pendingCerts[ii].num -= 1;
+                }
+                $('#certModalCenter').modal('hide');
+            }).catch(function(err) {
+                console.log("fail   : " + Date.now() + " -->: add cert fail!");
+                console.log(err.message);
+                alert("拒绝领取证书失败！\n失败原因：\n" + err.message);
+            });
+        }
     }
 });
 
@@ -687,3 +731,49 @@ window.vm = vm;
 //     }
 // });
 
+
+        // create: function (todo) {
+        //     var that = this;
+        //     that.$resource('/api/todos').save(todo).then(function (resp) {
+        //         resp.json().then(function (result) {
+        //             that.todos.push(result);
+        //         });
+        //     }, showError);
+        // },
+
+        // update: function (todo, prop, e) {
+        //     var that = this;
+        //     var t = {
+        //         name: todo.name,
+        //         description: todo.description
+        //     };
+        //     t[prop] = e.target.innerText;
+        //     if (t[prop] === todo[prop]) {
+        //         return;
+        //     }
+        //     that.$resource('/api/todos/' + todo.id).update(t).then(function (resp) {
+        //         resp.json().then(function (r) {
+        //             todo.name = r.name;
+        //             todo.description = r.description;
+        //         });
+        //     }, function (resp) {
+        //         e.target.innerText = todo[prop];
+        //         showError(resp);
+        //     });
+        // },
+
+        // remove: function (todo) {
+        //     var that = this;
+        //     that.$resource('/api/todos/' + todo.id).delete().then(function (resp) {
+        //         var i, index = -1;
+        //         for (i=0; i<that.todos.length; i++) {
+        //             if (that.todos[i].id === todo.id) {
+        //                 index = i;
+        //                 break;
+        //             }
+        //         }
+        //         if (index >= 0) {
+        //             that.todos.splice(index, 1);
+        //         }
+        //     }, showError);
+        // }
