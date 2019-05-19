@@ -340,6 +340,10 @@ contract PASS{
             i < orgs[orgIDs[orgName]].certs.length,
             "This org don't have this cert!"
         );
+        require(
+            userIDs[user] > 0 && userIDs[user] < users.length,
+            "证书只能颁发给已经注册的用户！"
+        );
 
         Certification memory cert;
 
