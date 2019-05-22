@@ -342,7 +342,7 @@ contract PASS{
         );
         require(
             userIDs[user] > 0 && userIDs[user] < users.length,
-            "证书只能颁发给已经注册的用户！"
+            "Certificates can only be issued to registered users!"
         );
 
         Certification memory cert;
@@ -386,8 +386,6 @@ contract PASS{
 
 //============================颁发证书========================
 
-//------------------------ApplyCert--------2-------------------
-
     function handleCertApply(bool res, uint certID) public onlyOrgMember(certs[certID].origin) {
         if(res){
             certs[certID].status = 1;
@@ -397,15 +395,6 @@ contract PASS{
             certs[certID].sender = msg.sender;
         }
     }
-
-    // function deleteCertApply(uint certID, uint i, uint j) private {
-    //     delete certs[certID];
-    //     delete users[userIDs[certs[certID].owner]].applyCerts[i];
-    //     delete orgs[orgIDs[certs[certID].origin]].applyCertIDs[j];
-    // }
-
-//==========================ApplyCert==========================
-
 }
 
 
@@ -417,7 +406,11 @@ contract PASS{
 
 
 
-
+   // function deleteCertApply(uint certID, uint i, uint j) private {
+    //     delete certs[certID];
+    //     delete users[userIDs[certs[certID].owner]].applyCerts[i];
+    //     delete orgs[orgIDs[certs[certID].origin]].applyCertIDs[j];
+    // }
 
     // function getCertOwner(uint i) private view returns(address) {
     //     return certs[i].owner;

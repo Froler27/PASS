@@ -74,8 +74,6 @@ var vm = new Vue({
         this.init();
     },
 
-    
-
     methods: {
         init: async function () {
             $('#userNickName').popover('disable');
@@ -710,10 +708,6 @@ var vm = new Vue({
                 console.log(err.message);
                 alert("拒绝领取证书失败！\n失败原因：\n" + err.message);
             });
-        },
-
-        applyCert: function(){
-            
         }
     }
 });
