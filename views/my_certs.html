@@ -1,0 +1,125 @@
+<div class="row align-items-center justify-content-lg-center">
+    <nav class="">
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-owend-tab" data-toggle="tab" href="#nav-owend" role="tab" aria-controls="nav-home" aria-selected="true">已获得</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">申请中</a>
+        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">待接受</a>
+      </div>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="tab-content col-12" id="nav-tabContent">
+        
+        <div class="tab-pane fade show active" id="nav-owend" role="tabpanel" aria-labelledby="nav-owend-tab">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">证书名称</th>
+                <th scope="col">证书类型</th>
+                <th scope="col">证书来源</th>
+                <th scope="col">证书状态</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="cert in ownCerts">
+                <th scope="row">{[ cert.num + 1 ]}</th>
+                <td>{[ cert.certName ]}</td>
+                <td>{[ cert.certType ]}</td>
+                <td>{[ cert.origin ]}</td>
+                <td>{[ cert.status ]}</td>
+                <td><button v-on:click="seeCert" type="button" class="btn btn-primary" data-toggle="modal" data-target="#certModalCenter" value="1">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">证书名称</th>
+                <th scope="col">证书类型</th>
+                <th scope="col">证书来源</th>
+                <th scope="col">证书状态</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="cert in applyCerts">
+                <th scope="row">{[ cert.num + 1 ]}</th>
+                <td>{[ cert.certName ]}</td>
+                <td>{[ cert.certType ]}</td>
+                <td>{[ cert.origin ]}</td>
+                <td>{[ cert.status ]}</td>
+                <td><button v-on:click="seeCert" type="button" class="btn btn-primary" data-toggle="modal" data-target="#certModalCenter" value="2">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">证书名称</th>
+                <th scope="col">证书类型</th>
+                <th scope="col">证书来源</th>
+                <th scope="col">证书状态</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="cert in pendingCerts">
+                <th scope="row">{[ cert.num + 1 ]}</th>
+                <td>{[ cert.certName ]}</td>
+                <td>{[ cert.certType ]}</td>
+                <td>{[ cert.origin ]}</td>
+                <td>{[ cert.status ]}</td>
+                <td><button v-on:click="seeCert" type="button" class="btn btn-primary" data-toggle="modal" data-target="#certModalCenter" value="3">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="certModalCenter" tabindex="-1" role="dialog" aria-labelledby="certModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+          <div class="card text-center">
+            <div class="card-header" id="cartModal-org"></div>
+            <div class="card-body cert-body">
+              <h5 class="card-title" id="cartModal-name"></h5>
+              
+              <div class="row" style="text-align:left;"><div class="col-2"></div><div class="col-10"><div class="row">
+                <div class="col-3">证书类型：</div><div class="col-9" id="cartModal-type"></div>
+                <div class="col-3">证书状态：</div><div class="col-9" id="cartModal-status"></div>
+                <div class="col-12" style="height: 10px;"></div>
+                <div class="col-3">颁发者名称：</div><div class="col-9" id="cartModal-orgUserName"></div>
+                <div class="col-3">颁发者地址：</div><div class="col-9" id="cartModal-orgUserAdr"></div>
+                <div class="col-12" style="height: 10px;"></div>
+                <div class="col-3"><h6>证书内容：</h6></div><div class="col-9" id="cartModal-certContent"></div>
+              </div></div></div>
+
+              <p class="card-text">
+                <p ></p>
+              </p>
+              
+              <div style="height: 20px;"></div>
+              <div id="ARbtn" class="f-hide">
+                <button type="button" class="btn btn-secondary" id="rejectCertBtn" v-on:click="rejectCert">拒绝</button>
+                <button type="button" class="btn btn-success" id="acceptCertBtn" v-on:click="acceptCert">领取</button>
+                <input id="wiatID" type="hidden"  value="">
+              </div>
+            </div>
+            
+            <div class="card-footer text-muted" id="cartModal-issueTime"></div>
+          </div>
+      </div>
+    </div>
+</div>

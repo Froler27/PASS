@@ -1,0 +1,141 @@
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#createOrgModal">
+    创建组织
+</button>
+  
+<!-- Modal -->
+<div class="modal fade" id="createOrgModal" tabindex="-1" role="dialog" aria-labelledby="createOrgModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="createOrgModalLongTitle">组织基本信息</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="orgName" class="col-form-label">组织名称：</label>
+                    <input data-container="body" data-toggle="popover" data-placement="bottom" data-content="组织名称必须填写！" type="text" class="form-control" id="orgName" placeholder="请输入组织名称" required>
+                </div>
+                <div class="form-group">
+                    <label for="orgBrief" class="col-form-label">组织简介：</label>
+                    <textarea class="form-control" id="orgBrief" placeholder="简单介绍一下你的组织"></textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-success" v-on:click="createOrg">提交</button>
+        </div>
+
+      </div>
+    </div>
+</div>
+
+
+<div class="row align-items-center justify-content-lg-center">
+    <nav class="">
+        <div class="nav nav-tabs" id="org-tab" role="tablist">
+        <a class="nav-item nav-link active" id="org-owend-tab" data-toggle="tab" href="#org-owend" role="tab" aria-controls="nav-owend" aria-selected="true">我创建的</a>
+        <a class="nav-item nav-link" id="org-admin-tab" data-toggle="tab" href="#org-admin" role="tab" aria-controls="nav-admin" aria-selected="false">我管理的</a>
+        <a class="nav-item nav-link" id="org-member-tab" data-toggle="tab" href="#org-member" role="tab" aria-controls="nav-member" aria-selected="false">我加入的</a>
+        </div>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="tab-content col-12" id="org-tabContent">
+        
+        <div class="tab-pane fade show active" id="org-owend" role="tabpanel" aria-labelledby="org-owend-tab">
+            <div id="ownedOrgsAccordion">
+                <div class="card" v-for="org in ownOrgs">
+                    <div class="card-header" :id="org.header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
+                        </button>
+                    </h5>
+                    </div>
+                                   <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#ownedOrgsAccordion">
+                    <div class="card-body">
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
+                        <p>
+                            <button v-on:click="showOrgPage" type="button" class="btn btn-outline-primary" :value="org.value">进入组织</button>
+                            <button class="f-hide" >{[ org.name ]}</button>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                <!-- <div class="card">
+                    <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Collapsible Group Item #2
+                        </button>
+                    </h5>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#ownedOrgsAccordion">
+                    <div class="card-body">
+                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                    </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="org-admin" role="tabpanel" aria-labelledby="org-admin-tab">
+            <div id="adminOrgsAccordion">
+                <div class="card" v-for="org in adminOrgs">
+                    <div class="card-header" :id="org.header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
+                        </button>
+                    </h5>
+                    </div>
+                                    <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#adminOrgsAccordion">
+                    <div class="card-body">
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="org-member-contact" role="tabpanel" aria-labelledby="org-member-tab">
+            <div id="memberOrgsAccordion">
+                <div class="card" v-for="org in memberOrgs">
+                    <div class="card-header" :id="org.header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" :data-target="org.btnShow" aria-expanded="false" :aria-controls="org.collapse">
+                        {[ org.name ]}
+                        </button>
+                    </h5>
+                    </div>
+                                    <!-- class="collapse show" -->
+                    <div :id="org.collapse" class="collapse" :aria-labelledby="org.header" data-parent="#memberOrgsAccordion">
+                    <div class="card-body">
+                        <p>创始人名称：{[ org.creatorName ]}</p>
+                        <p>创始人地址：{[ org.creator ]}</p>
+                        <p>创建时间：{[ org.createdDate ]}</p>
+                        <p>简介：{[ org.brief ]}</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
